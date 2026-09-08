@@ -9,7 +9,7 @@ const cvPath = '/documents/Pruden-Jack-Gideon-CV.pdf'
 
 export function Cv() {
   return (
-    <section id="cv" className="py-20 md:py-32 bg-[#f7f6f2]">
+    <section id="cv" className="py-20 md:py-32 bg-transparent">
       <PageContainer>
         <SectionHeading
           title="Curriculum Vitae"

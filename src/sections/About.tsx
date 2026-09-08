@@ -4,16 +4,14 @@ import { personalInfo } from '../data/personal'
 
 export function About() {
   return (
-    <section id="about" className="py-20 md:py-32 bg-white">
+    <section id="about" className="py-16 md:py-28 bg-transparent">
       <PageContainer>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           {/* Image */}
-          <div className="relative mx-auto w-80 h-80 md:w-full">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-300 to-purple-100 rounded-2xl opacity-20"></div>
-            <div className="absolute inset-4 bg-gradient-to-br from-purple-200 to-purple-50 rounded-2xl flex items-center justify-center border-2 border-purple-200">
-              <span className="text-gray-400 font-medium text-center px-4">
-                About Image
-              </span>
+          <div className="relative mx-auto w-72 h-72 md:w-full md:h-96 card-radius card-surface">
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-400/6 to-red-500/4" />
+            <div className="absolute inset-4 rounded-2xl flex items-center justify-center border border-slate-700/40">
+              <span className="text-slate-400 font-medium text-center px-4">About Image</span>
             </div>
           </div>
 
@@ -21,8 +19,8 @@ export function About() {
           <div>
             <SectionHeading title="About" centered={false} />
 
-            <div className="mt-8 space-y-6 text-gray-600">
-              <p className="text-lg leading-relaxed">
+            <div className="mt-6 space-y-6 text-slate-300">
+              <p className="text-base leading-relaxed">
                 I'm a software developer and AI builder focused on creating digital experiences that matter.
               </p>
 
@@ -37,24 +35,12 @@ export function About() {
               </p>
 
               <div className="pt-4">
-                <p className="text-sm text-gray-500 mb-3">
-                  <strong>Location:</strong> {personalInfo.location}
-                </p>
+                <p className="text-sm text-slate-400 mb-3"><strong>Location:</strong> {personalInfo.location}</p>
                 {personalInfo.email && (
-                  <p className="text-sm text-gray-500 mb-3">
-                    <strong>Email:</strong>{' '}
-                    <a
-                      href={`mailto:${personalInfo.email}`}
-                      className="text-purple-600 hover:underline"
-                    >
-                      {personalInfo.email}
-                    </a>
-                  </p>
+                  <p className="text-sm text-slate-400 mb-3"><strong>Email:</strong>{' '}<a href={`mailto:${personalInfo.email}`} className="text-blue-300 hover:underline">{personalInfo.email}</a></p>
                 )}
                 {personalInfo.availability && (
-                  <p className="text-sm text-gray-500">
-                    <strong>Availability:</strong> {personalInfo.availability}
-                  </p>
+                  <p className="text-sm text-slate-400"><strong>Availability:</strong> {personalInfo.availability}</p>
                 )}
               </div>
             </div>

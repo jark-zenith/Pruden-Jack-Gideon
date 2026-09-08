@@ -11,7 +11,9 @@ import { Skills } from './sections/Skills'
 
 function App() {
   return (
-    <div className="min-h-screen overflow-hidden bg-[#f7f6f2] text-[#20201e]">
+    <div className="site-shell text-slate-100">
+      <div className="site-glow site-glow-blue" aria-hidden="true" />
+      <div className="site-glow site-glow-red" aria-hidden="true" />
       <Navbar />
       <main>
         <Hero />

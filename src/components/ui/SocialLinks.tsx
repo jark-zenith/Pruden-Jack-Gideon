@@ -32,7 +32,7 @@ export function SocialLinks({ className = 'gap-4' }: SocialLinksProps) {
 
   if (activeLinks.length === 0) {
     return (
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-slate-500">
         Social links coming soon
       </p>
     )
@@ -48,7 +48,7 @@ export function SocialLinks({ className = 'gap-4' }: SocialLinksProps) {
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#20201e] hover:text-purple-600 transition-colors"
+            className="text-slate-300 transition-colors hover:text-blue-400"
             aria-label={link.label}
             title={link.label}
           >
