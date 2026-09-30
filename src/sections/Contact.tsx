@@ -1,4 +1,4 @@
-import { Mail, MessageSquare, Phone } from 'lucide-react'
+import { ArrowUpRight, Mail, MessageSquare, Phone } from 'lucide-react'
 import { PageContainer } from '../components/layout/PageContainer'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import { Button } from '../components/ui/Button'
@@ -7,81 +7,60 @@ import { personalInfo } from '../data/personal'
 
 export function Contact() {
   return (
-    <section id="contact" className="py-20 md:py-32 bg-white">
+    <section id="contact" className="py-20 md:py-32">
       <PageContainer>
         <SectionHeading
-          title="Let's Talk"
-          subtitle="I'm always interested in new ideas and opportunities"
+          eyebrow="Open channel"
+          title="Let's build something."
+          subtitle="For collaborations, internships, freelance work, or technology conversations, connect with me through the channels below."
         />
 
-        <div className="mt-16 max-w-2xl mx-auto">
-          <div className="p-8 rounded-xl bg-gradient-to-br from-purple-50 to-white border border-purple-200">
-            {/* Contact Methods */}
-            <div className="space-y-6 mb-8">
-              {personalInfo.email && (
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0 mt-1">
-                    <Mail className="text-purple-600" size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-[#20201e] mb-1">Email</h3>
-                    <a
-                      href={`mailto:${personalInfo.email}`}
-                      className="text-purple-600 hover:underline"
-                    >
-                      {personalInfo.email}
-                    </a>
-                  </div>
-                </div>
-              )}
+        <div className="mx-auto mt-12 max-w-4xl">
+          <div className="card-surface card-radius overflow-hidden p-7 sm:p-10">
+            <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr]">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-400">Contact</p>
+                <h3 className="mt-3 text-2xl font-bold text-slate-100">Start with a message.</h3>
+                <p className="mt-4 max-w-lg leading-relaxed text-slate-400">
+                  I keep this portfolio intentionally simple: the work comes first, and direct communication handles the rest.
+                </p>
 
-              {personalInfo.phone && (
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0 mt-1">
-                    <Phone className="text-purple-600" size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-[#20201e] mb-1">Phone</h3>
-                    <a
-                      href={`tel:${personalInfo.phone}`}
-                      className="text-purple-600 hover:underline"
-                    >
-                      {personalInfo.phone}
+                <div className="mt-7 space-y-4">
+                  {personalInfo.email && (
+                    <a href={'mailto:' + personalInfo.email} className="flex items-center gap-3 text-slate-200 hover:text-blue-300">
+                      <Mail size={18} className="text-blue-400" /> {personalInfo.email}
                     </a>
-                  </div>
+                  )}
+                  {personalInfo.phone && (
+                    <a href={'tel:' + personalInfo.phone} className="flex items-center gap-3 text-slate-200 hover:text-blue-300">
+                      <Phone size={18} className="text-blue-400" /> {personalInfo.phone}
+                    </a>
+                  )}
+                  {!personalInfo.email && !personalInfo.phone && (
+                    <p className="flex items-center gap-3 text-sm text-slate-500">
+                      <MessageSquare size={18} className="text-blue-400" /> Direct email can be added from the owner dashboard.
+                    </p>
+                  )}
                 </div>
-              )}
 
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0 mt-1">
-                  <MessageSquare className="text-purple-600" size={20} />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-[#20201e] mb-3">Connect on Social</h3>
+                <div className="mt-8">
                   <SocialLinks className="gap-3" />
                 </div>
               </div>
+
+              <div className="rounded-2xl border border-blue-400/15 bg-blue-500/[0.04] p-6">
+                <p className="text-sm font-semibold text-slate-200">Current availability</p>
+                <p className="mt-3 leading-relaxed text-slate-400">{personalInfo.availability}</p>
+                <div className="mt-6 h-px bg-slate-800" />
+                <div className="mt-6 flex items-center justify-between text-sm">
+                  <span className="text-slate-500">Based in</span>
+                  <span className="text-slate-200">{personalInfo.location}</span>
+                </div>
+                <Button href="https://github.com/jark-zenith" variant="ghost" className="mt-7 w-full">
+                  GitHub <ArrowUpRight size={16} />
+                </Button>
+              </div>
             </div>
-
-            {/* Divider */}
-            <div className="my-8 border-t border-purple-200"></div>
-
-            {/* CTA */}
-            <div className="text-center">
-              <p className="text-gray-600 mb-4">
-                The best way to reach me is by email or through my social channels.
-              </p>
-              <Button href={`mailto:${personalInfo.email || 'contact@prudenackgideon.dev'}`} variant="primary">
-                Send an Email
-              </Button>
-            </div>
-          </div>
-
-          {/* Optional Contact Form */}
-          <div className="mt-12 text-center">
-            <p className="text-sm text-gray-500">
-              A contact form is coming soon. For now, please reach out via email or social media.
-            </p>
           </div>
         </div>
       </PageContainer>
