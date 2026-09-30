@@ -1,10 +1,8 @@
-import { Download, FileText } from 'lucide-react'
+import { ExternalLink, FileText } from 'lucide-react'
 import { PageContainer } from '../components/layout/PageContainer'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import { Button } from '../components/ui/Button'
 import { personalInfo } from '../data/personal'
-
-const cvPath = '/documents/Pruden-Jack-Gideon-CV.pdf'
 
 export function Cv() {
   return (
@@ -31,15 +29,16 @@ export function Cv() {
 
             <div className="mt-8 border-t border-slate-800 pt-7">
               <p className="max-w-2xl leading-relaxed text-slate-400">
-                Download the current CV for education, technical skills, selected work, and project experience.
+                The portfolio is ready for the current CV document to be uploaded through the owner workflow.
+                Once the PDF is available, this section can expose it as the public download.
               </p>
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <Button href={cvPath} variant="primary">
-                  <Download size={17} /> Download CV
+                <Button href="#contact" variant="primary">
+                  Request CV <ExternalLink size={17} />
                 </Button>
-                <Button href="#contact" variant="secondary">Contact me</Button>
+                <Button href="https://github.com/jark-zenith" variant="secondary">View GitHub</Button>
               </div>
-              <p className="mt-6 text-xs text-slate-500">Keep the PDF in public/documents/ and replace it whenever the CV is updated.</p>
+              <p className="mt-6 text-xs text-slate-500">Recommended public file path: public/documents/Pruden-Jack-Gideon-CV.pdf</p>
             </div>
           </div>
         </div>
