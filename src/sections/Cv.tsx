@@ -4,50 +4,42 @@ import { SectionHeading } from '../components/ui/SectionHeading'
 import { Button } from '../components/ui/Button'
 import { personalInfo } from '../data/personal'
 
-// Check if CV file exists in public/documents
 const cvPath = '/documents/Pruden-Jack-Gideon-CV.pdf'
 
 export function Cv() {
   return (
-    <section id="cv" className="py-20 md:py-32 bg-transparent">
+    <section id="cv" className="py-20 md:py-32">
       <PageContainer>
         <SectionHeading
+          eyebrow="Documents"
           title="Curriculum Vitae"
-          subtitle="My professional experience, education, and qualifications"
+          subtitle="A concise record of my education, technical work, and ongoing development."
         />
 
-        <div className="mt-16 max-w-2xl mx-auto">
-          <div className="p-8 rounded-xl bg-white border border-gray-200">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-lg bg-purple-100 flex items-center justify-center">
-                <FileText className="text-purple-600" size={32} />
+        <div className="mx-auto mt-12 max-w-3xl">
+          <div className="card-surface card-radius p-7 sm:p-10">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-blue-400/25 bg-blue-500/10 text-blue-300">
+                <FileText size={28} />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-[#20201e]">
-                  {personalInfo.name}
-                </h3>
-                <p className="text-gray-600">{personalInfo.role}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-400">Professional document</p>
+                <h3 className="mt-2 text-2xl font-bold text-slate-100">{personalInfo.name}</h3>
+                <p className="mt-1 text-slate-400">{personalInfo.role}</p>
               </div>
             </div>
 
-            <div className="border-t border-gray-200 pt-6">
-              <p className="text-gray-600 mb-6">
-                Download my CV to view my complete professional history, education, certifications, and achievements.
+            <div className="mt-8 border-t border-slate-800 pt-7">
+              <p className="max-w-2xl leading-relaxed text-slate-400">
+                Download the current CV for education, technical skills, selected work, and project experience.
               </p>
-
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <Button href={cvPath} variant="primary">
-                  <Download size={18} />
-                  Download CV (PDF)
+                  <Download size={17} /> Download CV
                 </Button>
-                <Button href="#contact" variant="secondary">
-                  Get in Touch
-                </Button>
+                <Button href="#contact" variant="secondary">Contact me</Button>
               </div>
-
-              <p className="text-sm text-gray-500 mt-6">
-                Last updated: December 2025 • v1.0 launching December 12, 2026
-              </p>
+              <p className="mt-6 text-xs text-slate-500">Keep the PDF in public/documents/ and replace it whenever the CV is updated.</p>
             </div>
           </div>
         </div>
