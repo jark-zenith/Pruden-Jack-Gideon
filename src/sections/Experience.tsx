@@ -1,63 +1,47 @@
+import { BriefcaseBusiness, GraduationCap, Sparkles } from 'lucide-react'
 import { PageContainer } from '../components/layout/PageContainer'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import { experience } from '../data/experience'
 
 export function Experience() {
+  const icons = [GraduationCap, Sparkles, BriefcaseBusiness]
+
   return (
-    <section id="experience" className="py-20 md:py-32 bg-white">
+    <section id="experience" className="py-20 md:py-32">
       <PageContainer>
         <SectionHeading
-          title="Experience"
-          subtitle="Education, work, projects, and achievements along the way"
+          eyebrow="Trajectory"
+          title="Experience & direction"
+          subtitle="A living timeline of study, experimentation, and product building."
         />
 
-        <div className="mt-16">
-          {experience.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600">
-                Experience timeline coming soon.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-8">
-              {experience.map((item, index) => (
-                <div key={index} className="relative pb-8">
-                  {/* Timeline line */}
+        <div className="mx-auto mt-12 max-w-4xl">
+          <div className="relative space-y-8">
+            {experience.map((item, index) => {
+              const Icon = icons[index % icons.length]
+              return (
+                <div key={item.title + index} className="relative pl-16">
                   {index !== experience.length - 1 && (
-                    <div className="absolute left-4 top-12 bottom-0 w-0.5 bg-purple-200"></div>
+                    <div className="absolute left-[1.15rem] top-12 bottom-[-2rem] w-px bg-gradient-to-b from-blue-400/40 to-slate-800" />
                   )}
-
-                  <div className="flex gap-6">
-                    {/* Timeline dot */}
-                    <div className="flex-shrink-0">
-                      <div className="relative z-10 w-9 h-9 rounded-full bg-purple-600 border-4 border-[#f7f6f2] flex items-center justify-center">
-                        <div className="w-2 h-2 rounded-full bg-white"></div>
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-grow pt-1">
-                      <div className="inline-block px-3 py-1 mb-2 text-xs font-semibold text-purple-700 bg-purple-50 rounded-full">
-                        {item.type}
-                      </div>
-                      <h3 className="text-lg font-bold text-[#20201e] mb-1">
-                        {item.title}
-                      </h3>
-                      <p className="text-gray-600 font-medium mb-1">
-                        {item.organization}
-                      </p>
-                      <p className="text-sm text-gray-500 mb-3">
-                        {item.date}
-                      </p>
-                      <p className="text-gray-600">
-                        {item.description}
-                      </p>
-                    </div>
+                  <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-xl border border-blue-400/20 bg-blue-500/10 text-blue-300">
+                    <Icon size={18} />
                   </div>
+                  <article className="card-surface card-radius p-6">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <span className="inline-flex rounded-full border border-blue-400/15 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-300">{item.type}</span>
+                        <h3 className="mt-3 text-xl font-bold text-slate-100">{item.title}</h3>
+                        <p className="mt-1 font-medium text-slate-300">{item.organization}</p>
+                      </div>
+                      <span className="text-sm text-slate-500">{item.date}</span>
+                    </div>
+                    <p className="mt-4 leading-relaxed text-slate-400">{item.description}</p>
+                  </article>
                 </div>
-              ))}
-            </div>
-          )}
+              )
+            })}
+          </div>
         </div>
       </PageContainer>
     </section>
