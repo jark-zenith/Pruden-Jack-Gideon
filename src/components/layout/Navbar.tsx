@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { LockKeyhole, Menu, X } from 'lucide-react'
-import { loginOwner } from '../../lib/adminApi'
+import { getSetupStatus, loginOwner, setupOwner } from '../../lib/adminApi'
 
 const navItems = [
   { label: 'Home', href: '#home' },
@@ -15,30 +15,62 @@ const navItems = [
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
-  const [showOwnerLogin, setShowOwnerLogin] = useState(false)
+  const [showOwner, setShowOwner] = useState(false)
+  const [setupRequired, setSetupRequired] = useState(false)
   const [ownerEmail, setOwnerEmail] = useState('')
   const [ownerPassword, setOwnerPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [active, setActive] = useState<string>('#home')
+  const [checkingSetup, setCheckingSetup] = useState(false)
+  const [active, setActive] = useState('#home')
 
-  const openOwnerLogin = () => {
+  const openOwner = async () => {
     setError('')
     setOwnerEmail('')
     setOwnerPassword('')
-    setShowOwnerLogin(true)
+    setConfirmPassword('')
+    setShowOwner(true)
     setIsOpen(false)
+    setCheckingSetup(true)
+    try {
+      const status = await getSetupStatus()
+      setSetupRequired(status.setupRequired)
+    } catch {
+      setSetupRequired(false)
+      setError('Owner API is unavailable. The setup service must be running first.')
+    } finally {
+      setCheckingSetup(false)
+    }
+  }
+
+  const closeOwner = () => {
+    if (loading) return
+    setShowOwner(false)
+    setError('')
+  }
+
+  const goOwner = () => {
+    window.history.pushState({}, '', '/owner')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+    setShowOwner(false)
   }
 
   const handleOwnerSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     setError('')
+    if (setupRequired && ownerPassword !== confirmPassword) {
+      setError('The passwords do not match.')
+      return
+    }
     setLoading(true)
     try {
-      await loginOwner(ownerEmail, ownerPassword)
-      window.history.pushState({}, '', '/owner')
-      window.dispatchEvent(new PopStateEvent('popstate'))
-      setShowOwnerLogin(false)
+      if (setupRequired) {
+        await setupOwner(ownerEmail, ownerPassword)
+      } else {
+        await loginOwner(ownerEmail, ownerPassword)
+      }
+      goOwner()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Owner authentication failed.')
     } finally {
@@ -68,44 +100,66 @@ export function Navbar() {
               <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-400/40 bg-blue-500/10 font-black text-blue-300">P</span>
               <span className="hidden sm:inline">PRUDEN / JACK GIDEON</span>
             </a>
-
             <div className="hidden items-center gap-6 md:flex">
               <div className="flex items-center gap-1 rounded-full border border-slate-800 bg-slate-950/60 p-1">
                 {navItems.map((item) => <a key={item.label} href={item.href} className={`rounded-full px-3 py-2 text-sm font-medium transition-all ${active === item.href ? 'bg-blue-500/15 text-blue-200 shadow-[inset_0_0_0_1px_rgba(96,165,250,0.4)]' : 'text-slate-300 hover:text-blue-300'}`}>{item.label}</a>)}
               </div>
               <a href="#contact" className="rounded-xl border border-blue-400/40 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-200">Let's Talk</a>
-              <button type="button" onClick={openOwnerLogin} className="inline-flex items-center gap-2 rounded-xl border border-slate-600 bg-slate-900/80 px-4 py-2 text-sm font-semibold text-slate-200 hover:border-blue-400/60"><LockKeyhole size={16} /> Owner</button>
+              <button type="button" onClick={openOwner} className="inline-flex items-center gap-2 rounded-xl border border-slate-600 bg-slate-900/80 px-4 py-2 text-sm font-semibold text-slate-200 hover:border-blue-400/60"><LockKeyhole size={16} /> Owner</button>
             </div>
-
             <button type="button" onClick={() => setIsOpen(!isOpen)} className="inline-flex items-center justify-center rounded-lg border border-slate-700 bg-slate-900/80 p-2 text-slate-200 md:hidden" aria-expanded={isOpen} aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}>
               {isOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
-
           <div className={`overflow-hidden transition-all duration-300 md:hidden ${isOpen ? 'max-h-[34rem] opacity-100' : 'max-h-0 opacity-0'}`}>
             <div className="space-y-1 border-t border-slate-700/60 pb-4 pt-3">
               {navItems.map((item) => <a key={item.label} href={item.href} onClick={() => setIsOpen(false)} className="block rounded-xl px-3 py-2.5 text-base font-medium text-slate-200 hover:bg-slate-800 hover:text-blue-300">{item.label}</a>)}
               <a href="#contact" onClick={() => setIsOpen(false)} className="mt-2 block rounded-xl border border-blue-400/40 bg-blue-500/10 px-3 py-2.5 text-center text-base font-semibold text-blue-200">Let's Talk</a>
-              <button type="button" onClick={openOwnerLogin} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-600 bg-slate-900 px-3 py-2.5 text-base font-semibold text-slate-200"><LockKeyhole size={17} /> Owner Access</button>
+              <button type="button" onClick={openOwner} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-600 bg-slate-900 px-3 py-2.5 text-base font-semibold text-slate-200"><LockKeyhole size={17} /> Owner Access</button>
             </div>
           </div>
         </div>
       </nav>
 
-      {showOwnerLogin && (
-        <div className="fixed inset-0 z-[100] grid place-items-center bg-slate-950/90 p-4 backdrop-blur-md">
-          <form onSubmit={handleOwnerSubmit} className="w-full max-w-md rounded-3xl border border-blue-400/25 bg-[#07101f] p-7 shadow-2xl shadow-blue-950/40">
+      {showOwner && (
+        <div className="fixed inset-0 z-[100] grid min-h-screen place-items-center overflow-y-auto bg-slate-950/90 p-4 backdrop-blur-md">
+          <form onSubmit={handleOwnerSubmit} className="my-8 w-full max-w-md rounded-3xl border border-blue-400/25 bg-[#07101f] p-7 shadow-2xl shadow-blue-950/40">
             <div className="mb-6 flex items-center justify-between">
-              <div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-400">PRUDEN secure area</p><h2 className="mt-2 text-2xl font-bold text-white">Owner Sign In</h2></div>
-              <button type="button" onClick={() => setShowOwnerLogin(false)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-800"><X size={20} /></button>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-400">PRUDEN secure area</p>
+                <h2 className="mt-2 text-2xl font-bold text-white">{checkingSetup ? 'Checking owner setup…' : setupRequired ? 'Owner Sign Up' : 'Owner Sign In'}</h2>
+              </div>
+              <button type="button" onClick={closeOwner} className="rounded-lg p-2 text-slate-400 hover:bg-slate-800"><X size={20} /></button>
             </div>
+
+            {!checkingSetup && setupRequired && (
+              <p className="mb-5 rounded-xl border border-blue-400/20 bg-blue-500/5 px-4 py-3 text-sm leading-relaxed text-blue-200">
+                First-time setup: create the owner email and password. Your password is stored server-side as a protected verifier, not in the browser.
+              </p>
+            )}
+
             <label className="text-sm font-medium text-slate-300">Owner email</label>
-            <input autoFocus type="email" value={ownerEmail} onChange={(e) => setOwnerEmail(e.target.value)} placeholder="Owner email" className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white outline-none focus:border-blue-400" required />
-            <label className="mt-4 block text-sm font-medium text-slate-300">Admin password</label>
-            <input type="password" value={ownerPassword} onChange={(e) => setOwnerPassword(e.target.value)} placeholder="Admin password" autoComplete="current-password" className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white outline-none focus:border-blue-400" required />
+            <input autoFocus={!checkingSetup} type="email" value={ownerEmail} onChange={(e) => setOwnerEmail(e.target.value)} placeholder="Owner email" autoComplete="email" className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white outline-none focus:border-blue-400" required disabled={checkingSetup} />
+
+            <label className="mt-4 block text-sm font-medium text-slate-300">Password</label>
+            <input type="password" value={ownerPassword} onChange={(e) => setOwnerPassword(e.target.value)} placeholder={setupRequired ? 'Create a password (12+ characters)' : 'Owner password'} autoComplete={setupRequired ? 'new-password' : 'current-password'} minLength={12} className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white outline-none focus:border-blue-400" required disabled={checkingSetup} />
+
+            {setupRequired && (
+              <>
+                <label className="mt-4 block text-sm font-medium text-slate-300">Confirm password</label>
+                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repeat your password" autoComplete="new-password" minLength={12} className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white outline-none focus:border-blue-400" required disabled={checkingSetup} />
+              </>
+            )}
+
             {error && <p className="mt-3 rounded-lg border border-red-400/20 bg-red-500/5 px-3 py-2 text-sm text-red-300">{error}</p>}
-            <p className="mt-4 text-xs leading-relaxed text-slate-500">Only the configured owner email and server-side admin password can enter. Credentials are never stored in the browser.</p>
-            <button disabled={loading} type="submit" className="mt-6 w-full rounded-xl bg-blue-500 px-4 py-3 font-semibold text-white hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-60">{loading ? 'Authenticating…' : 'Sign in securely'}</button>
+
+            <p className="mt-4 text-xs leading-relaxed text-slate-500">
+              {setupRequired ? 'Use a unique password of at least 12 characters. After setup, this becomes the normal Owner Sign In.' : 'Credentials are checked by the server. The password is never stored in the browser.'}
+            </p>
+
+            <button disabled={loading || checkingSetup} type="submit" className="mt-6 w-full rounded-xl bg-blue-500 px-4 py-3 font-semibold text-white hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-60">
+              {loading ? (setupRequired ? 'Creating owner account…' : 'Authenticating…') : checkingSetup ? 'Checking…' : setupRequired ? 'Create Owner Account' : 'Sign in securely'}
+            </button>
           </form>
         </div>
       )}
