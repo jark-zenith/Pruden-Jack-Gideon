@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Activity, Check, ChevronRight, CircleAlert, Eye, FileImage, ImagePlus, LayoutDashboard, Pencil, Plus, Rocket, Save, ShieldCheck, Sparkles, Trash2, UploadCloud, X } from 'lucide-react'
+import { Activity, Check, ChevronRight, CircleAlert, Eye, FileImage, ImagePlus, Pencil, Plus, Rocket, Save, ShieldCheck, Sparkles, Trash2, UploadCloud, X } from 'lucide-react'
 import { logoutNavigationItem, ownerNavigation } from './navigation'
 import type { OwnerSession } from './types'
 
