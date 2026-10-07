@@ -1,9 +1,11 @@
-import { ArrowUpRight, Mail, MessageSquare, Phone } from 'lucide-react'
+import { Mail, MessageCircle, Phone } from 'lucide-react'
 import { PageContainer } from '../components/layout/PageContainer'
 import { SectionHeading } from '../components/ui/SectionHeading'
-import { Button } from '../components/ui/Button'
 import { SocialLinks } from '../components/ui/SocialLinks'
 import { personalInfo } from '../data/personal'
+
+const whatsappNumber = '254180574470'
+const emails = ['jarkpruden@gmail.com', 'developerjarkai@gmail.com']
 
 export function Contact() {
   return (
@@ -12,7 +14,7 @@ export function Contact() {
         <SectionHeading
           eyebrow="Open channel"
           title="Let's build something."
-          subtitle="For collaborations, internships, freelance work, or technology conversations, connect with me through the channels below."
+          subtitle="For collaborations, internships, freelance work, or technology conversations, connect with me directly."
         />
 
         <div className="mx-auto mt-12 max-w-4xl">
@@ -26,21 +28,22 @@ export function Contact() {
                 </p>
 
                 <div className="mt-7 space-y-4">
-                  {personalInfo.email && (
-                    <a href={'mailto:' + personalInfo.email} className="flex items-center gap-3 text-slate-200 hover:text-blue-300">
-                      <Mail size={18} className="text-blue-400" /> {personalInfo.email}
+                  {emails.map((email) => (
+                    <a key={email} href={'mailto:' + email} className="flex items-center gap-3 text-slate-200 transition hover:text-blue-300">
+                      <Mail size={18} className="text-blue-400" /> {email}
                     </a>
-                  )}
-                  {personalInfo.phone && (
-                    <a href={'tel:' + personalInfo.phone} className="flex items-center gap-3 text-slate-200 hover:text-blue-300">
-                      <Phone size={18} className="text-blue-400" /> {personalInfo.phone}
-                    </a>
-                  )}
-                  {!personalInfo.email && !personalInfo.phone && (
-                    <p className="flex items-center gap-3 text-sm text-slate-500">
-                      <MessageSquare size={18} className="text-blue-400" /> Direct email can be added from the owner dashboard.
-                    </p>
-                  )}
+                  ))}
+                  <a href="tel:+254180574470" className="flex items-center gap-3 text-slate-200 transition hover:text-blue-300">
+                    <Phone size={18} className="text-blue-400" /> +254 180 574470
+                  </a>
+                  <a
+                    href="https://wa.me/254180574470"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl border border-emerald-400/20 bg-emerald-400/5 px-4 py-3 text-sm font-semibold text-emerald-300 transition hover:border-emerald-300/40 hover:bg-emerald-400/10"
+                  >
+                    <MessageCircle size={18} /> Chat on WhatsApp
+                  </a>
                 </div>
 
                 <div className="mt-8">
@@ -56,14 +59,25 @@ export function Contact() {
                   <span className="text-slate-500">Based in</span>
                   <span className="text-slate-200">{personalInfo.location}</span>
                 </div>
-                <Button href="https://github.com/jark-zenith" variant="ghost" className="mt-7 w-full">
-                  GitHub <ArrowUpRight size={16} />
-                </Button>
+                <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                  <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Direct channels</p>
+                  <p className="mt-2 text-sm text-slate-300">WhatsApp, email and phone are open for professional enquiries.</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </PageContainer>
+
+      <a
+        href="https://wa.me/254180574470"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Chat with Pruden on WhatsApp"
+        className="fixed bottom-6 right-6 z-40 grid h-14 w-14 place-items-center rounded-full border border-emerald-300/30 bg-emerald-500 text-white shadow-2xl shadow-emerald-950/40 transition hover:-translate-y-1 hover:bg-emerald-400 md:bottom-8 md:right-8"
+      >
+        <MessageCircle size={27} />
+      </a>
     </section>
   )
 }
