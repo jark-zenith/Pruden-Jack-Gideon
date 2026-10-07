@@ -66,32 +66,29 @@ export function savePortfolioStore(store: PortfolioStore) {
 export async function uploadPortfolioImage(file: File, onProgress?: (percent: number) => void) {
   if (file.size > 8 * 1024 * 1024) throw new Error('Images must be 8MB or smaller.')
   if (!file.type.startsWith('image/')) throw new Error('Only image files are allowed.')
+  if (!API_BASE) throw new Error('Admin API is not configured.')
 
-  const signed = await request<{ signedUrl: string; publicUrl: string }>('/api/upload-url', {
-    method: 'POST',
-    body: JSON.stringify({ name: file.name, mime: file.type, size: file.size }),
-  })
-
-  await new Promise<void>((resolve, reject) => {
+  return await new Promise<{ url: string }>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
-    xhr.open('PUT', signed.signedUrl)
+    xhr.open('POST', API_BASE + '/api/upload')
+    xhr.withCredentials = true
     xhr.setRequestHeader('Content-Type', file.type)
-    xhr.setRequestHeader('Cache-Control', '3600')
+    xhr.setRequestHeader('X-Upload-Name', encodeURIComponent(file.name))
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) onProgress?.(Math.round((event.loaded / event.total) * 100))
     }
     xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
+      let body: { publicUrl?: string; error?: string } = {}
+      try { body = JSON.parse(xhr.responseText || '{}') } catch {}
+      if (xhr.status >= 200 && xhr.status < 300 && body.publicUrl) {
         onProgress?.(100)
-        resolve()
+        resolve({ url: body.publicUrl })
       } else {
-        reject(new Error(xhr.responseText || `Supabase upload failed (HTTP ${xhr.status}).`))
+        reject(new Error(body.error || xhr.responseText || `Upload failed (HTTP ${xhr.status}).`))
       }
     }
-    xhr.onerror = () => reject(new Error('Could not connect to Supabase Storage.'))
+    xhr.onerror = () => reject(new Error('Could not connect to the owner upload service.'))
     xhr.onabort = () => reject(new Error('Upload cancelled.'))
     xhr.send(file)
   })
-
-  return { url: signed.publicUrl }
 }
