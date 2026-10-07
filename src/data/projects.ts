@@ -21,4 +21,15 @@ export const projects: Project[] = [
     status: 'In development',
     githubUrl: 'https://pruden-ai-tech-industries.onrender.com/',
   },
+  {
+    id: 'gideon-si',
+    title: 'GIDEON SI',
+    description: 'GIDEON Super Intelligence — an original PRUDEN AI TECH INDUSTRIES personal AI system being engineered around multimodal intelligence, realtime-capable voice, user-controlled memory, secure tools, research, coding assistance, and future device integrations.',
+    image: 'https://raw.githubusercontent.com/jark-zenith/Gideon-SI-/main/file_00000000e13081f78567b57ce2025177.png',
+    technologies: ['TypeScript', 'AI', 'Security', 'Voice', 'Multimodal'],
+    category: 'AI / Super Intelligence',
+    featured: true,
+    status: 'Ongoing',
+    githubUrl: 'https://github.com/jark-zenith/Gideon-SI-',
+  },
 ]
