@@ -47,10 +47,10 @@ export function Navbar() {
             href="#home"
             className="flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.18em] text-slate-100"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-400/40 bg-blue-500/10 font-bold text-blue-300">
-              PJ
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-400/40 bg-blue-500/10 font-black text-blue-300 shadow-[0_0_20px_rgba(59,130,246,0.12)]">
+              P
             </span>
-            <span className="hidden sm:inline">Pruden Jack Gideon</span>
+            <span className="hidden sm:inline">PRUDEN / JACK GIDEON</span>
           </a>
 
           <div className="hidden items-center gap-8 md:flex">
