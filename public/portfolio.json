@@ -9,27 +9,7 @@
       "category": "AI / Assistant",
       "featured": true,
       "status": "In development",
-      "githubUrl": "https://github.com/jark-zenith/V.E.R.O.N.I.C.C.A"
-    },
-    {
-      "id": "ivy-mark-2",
-      "title": "Ivy Mark 2",
-      "description": "A personal assistant concept with a visual identity, conversational interface, voice foundations, and a path toward desktop-level assistance.",
-      "technologies": ["React", "TypeScript", "AI", "UI"],
-      "category": "AI / Assistant",
-      "featured": true,
-      "status": "In development",
-      "githubUrl": "https://github.com/jark-zenith/Ivy-mark-2"
-    },
-    {
-      "id": "deon-6",
-      "title": "DEON-6",
-      "description": "An experimental model project exploring a Kenyan-built language model direction and the engineering foundations needed for future GPU-backed training.",
-      "technologies": ["Python", "PyTorch", "CUDA", "ML"],
-      "category": "AI / Research",
-      "featured": true,
-      "status": "Experimental",
-      "githubUrl": "https://github.com/jark-zenith/deon-6-model"
+      "githubUrl": "https://veronicca-interface-v2.onrender.com/"
     },
     {
       "id": "pruden-ai-tech",
@@ -39,37 +19,18 @@
       "category": "Technology / Business",
       "featured": true,
       "status": "In development",
-      "githubUrl": "https://github.com/jark-zenith/PRUDEN-AI-TECH-INDUSTRIES-"
+      "githubUrl": "https://pruden-ai-tech-industries.onrender.com/"
     },
     {
-      "id": "rita",
-      "title": "R.I.T.A",
-      "description": "A finance application foundation for income, expenses, budgets, savings projections, reconciliation, business performance, and future intelligent financial assistance.",
-      "technologies": ["React", "TypeScript", "Supabase", "Finance"],
-      "category": "FinTech / Product",
+      "id": "gideon-si",
+      "title": "GIDEON SI",
+      "description": "GIDEON Super Intelligence — an original PRUDEN AI TECH INDUSTRIES personal AI system being engineered around multimodal intelligence, realtime-capable voice, user-controlled memory, secure tools, research, coding assistance, and future device integrations.",
+      "image": "https://raw.githubusercontent.com/jark-zenith/Gideon-SI-/main/file_00000000e13081f78567b57ce2025177.png",
+      "technologies": ["TypeScript", "AI", "Security", "Voice", "Multimodal"],
+      "category": "AI / Super Intelligence",
       "featured": true,
-      "status": "In development",
-      "githubUrl": "https://github.com/jark-zenith"
-    },
-    {
-      "id": "ichat",
-      "title": "Ichat",
-      "description": "A WhatsApp-inspired messaging product focused on reliable phone-based authentication, conversations, PostgreSQL persistence, and a clean mobile-first experience.",
-      "technologies": ["React", "TypeScript", "PostgreSQL", "PWA"],
-      "category": "Web Product",
-      "featured": true,
-      "status": "In development",
-      "githubUrl": "https://github.com/jark-zenith/Ichat"
-    },
-    {
-      "id": "pruden-network",
-      "title": "Pruden Network",
-      "description": "A software-network concept connecting technology, AI, education, creativity, business, and future innovation through one expanding digital ecosystem.",
-      "technologies": ["React", "TypeScript", "Vite"],
-      "category": "Web Product",
-      "featured": true,
-      "status": "Prototype",
-      "githubUrl": "https://github.com/jark-zenith/Pruden-Network"
+      "status": "Ongoing",
+      "githubUrl": "https://github.com/jark-zenith/Gideon-SI-"
     }
   ]
 }
