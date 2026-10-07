@@ -11,29 +11,58 @@ import { Services } from './sections/Services'
 import { Skills } from './sections/Skills'
 import { OwnerDashboard } from './owner/OwnerDashboard'
 import type { OwnerSession } from './owner/types'
+import { getOwnerSession, logoutOwner } from './lib/adminApi'
 
 function App() {
-  const [isOwnerPreview, setIsOwnerPreview] = useState(window.location.pathname === '/owner')
+  const [isOwnerRoute, setIsOwnerRoute] = useState(window.location.pathname === '/owner')
+  const [ownerSession, setOwnerSession] = useState<OwnerSession | null>(null)
+  const [checkingOwner, setCheckingOwner] = useState(window.location.pathname === '/owner')
 
   useEffect(() => {
-    const handlePopState = () => setIsOwnerPreview(window.location.pathname === '/owner')
+    const handlePopState = () => setIsOwnerRoute(window.location.pathname === '/owner')
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
-  if (isOwnerPreview) {
-    const previewSession: OwnerSession = {
-      ownerId: 'owner-preview',
-      role: 'owner',
-      expiresAt: 'Backend auth pending',
+  useEffect(() => {
+    if (!isOwnerRoute) {
+      setCheckingOwner(false)
+      setOwnerSession(null)
+      return
     }
+
+    let cancelled = false
+    setCheckingOwner(true)
+    getOwnerSession()
+      .then((session) => {
+        if (!cancelled) setOwnerSession({ ownerId: session.ownerId, role: 'owner', expiresAt: session.expiresAt })
+      })
+      .catch(() => {
+        if (!cancelled) {
+          window.history.replaceState({}, '', '/')
+          setIsOwnerRoute(false)
+          setOwnerSession(null)
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setCheckingOwner(false)
+      })
+
+    return () => { cancelled = true }
+  }, [isOwnerRoute])
+
+  if (isOwnerRoute) {
+    if (checkingOwner) return <div className="grid min-h-screen place-items-center bg-[#050914] text-slate-300">Verifying secure owner session…</div>
+    if (!ownerSession) return null
 
     return (
       <OwnerDashboard
-        session={previewSession}
-        onSignOut={() => {
-          window.history.pushState({}, '', '/')
-          setIsOwnerPreview(false)
+        session={ownerSession}
+        onSignOut={async () => {
+          await logoutOwner().catch(() => undefined)
+          window.history.replaceState({}, '', '/')
+          setOwnerSession(null)
+          setIsOwnerRoute(false)
         }}
       />
     )
