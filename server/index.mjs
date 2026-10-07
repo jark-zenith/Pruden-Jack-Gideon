@@ -172,37 +172,41 @@ async function uploadToGitHub(name, base64) {
   return 'https://raw.githubusercontent.com/' + GITHUB_REPO + '/' + GITHUB_BRANCH + '/' + path
 }
 
-async function uploadToSupabase(name, mime, base64) {
+async function createSupabaseSignedUpload(name, mime) {
   if (!SUPABASE_URL) throw new Error('SUPABASE_URL is not configured')
   if (!SUPABASE_SECRET_KEY) throw new Error('SUPABASE_SECRET_KEY is not configured on the admin API')
 
   const original = String(name || 'upload')
   const ext = (original.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin'
-  const safeBase = original.replace(/\.[^.]+$/, '').toLowerCase()
+  const safeBase = original.replace(/\\.[^.]+$/, '').toLowerCase()
     .replace(/[^a-z0-9_-]+/g, '-').replace(/-+/g, '-')
     .replace(/^-|-$/g, '').slice(0, 80) || 'portfolio-image'
   const path = `owner/${Date.now()}-${crypto.randomUUID()}-${safeBase}.${ext}`
-  const bytes = Buffer.from(base64, 'base64')
 
-  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${SUPABASE_BUCKET}/${path}`, {
-    method: 'POST',
-    headers: {
-      Authorization: 'Bearer ' + SUPABASE_SECRET_KEY,
-      apikey: SUPABASE_SECRET_KEY,
-      'Content-Type': mime,
-      'x-upsert': 'false',
+  const response = await fetch(
+    `${SUPABASE_URL}/storage/v1/object/upload/sign/${SUPABASE_BUCKET}/${path}`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + SUPABASE_SECRET_KEY,
+        apikey: SUPABASE_SECRET_KEY,
+        'Content-Type': 'application/json',
+        'x-upsert': 'false',
+      },
+      body: '{}',
     },
-    body: bytes,
-  })
+  )
 
   const data = await response.json().catch(() => ({}))
-  if (!response.ok) {
-    throw new Error(data.message || data.error || 'Supabase Storage upload failed')
-  }
+  if (!response.ok) throw new Error(data.message || data.error || 'Could not create Supabase signed upload URL')
 
-  return `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${path}`
+  const relative = String(data.url || '')
+  if (!relative) throw new Error('Supabase did not return a signed upload URL')
+
+  const signedUrl = relative.startsWith('http') ? relative : SUPABASE_URL + relative
+  const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${path}`
+  return { signedUrl, publicUrl, path, mime }
 }
-
 function sessionCookie(value, maxAge = Math.floor(SESSION_TTL_MS / 1000)) {
   return 'pruden_owner_session=' + encodeURIComponent(value) + '; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=' + maxAge
 }
@@ -274,15 +278,16 @@ const server = http.createServer(async (req, res) => {
       await savePortfolio(next, 'feat: update portfolio from owner dashboard')
       return json(res, 200, next, headers)
     }
-    if (url.pathname === '/api/upload' && req.method === 'POST') {
+    if (url.pathname === '/api/upload-url' && req.method === 'POST') {
       if (!authenticated(req)) return json(res, 401, { error: 'Owner authentication required.' }, headers)
       const body = await readBody(req)
       const mime = String(body.mime || '')
       const name = String(body.name || 'upload')
-      const base64 = String(body.base64 || '')
-      if (!mime.startsWith('image/') || !base64 || Buffer.byteLength(base64, 'base64') > MAX_UPLOAD_BYTES) return json(res, 400, { error: 'Only images up to 8MB are accepted.' }, headers)
-      const imageUrl = await uploadToSupabase(name, mime, base64)
-      return json(res, 200, { url: imageUrl }, headers)
+      const size = Number(body.size || 0)
+      if (!mime.startsWith('image/') || !name || !Number.isFinite(size) || size <= 0 || size > MAX_UPLOAD_BYTES) {
+        return json(res, 400, { error: 'Only images up to 8MB are accepted.' }, headers)
+      }
+      return json(res, 200, await createSupabaseSignedUpload(name, mime), headers)
     }
     return json(res, 404, { error: 'Not found' }, headers)
   } catch (error) {
