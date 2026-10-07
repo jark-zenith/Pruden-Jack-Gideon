@@ -63,17 +63,35 @@ export function savePortfolioStore(store: PortfolioStore) {
   return request<PortfolioStore>('/api/portfolio', { method: 'PUT', body: JSON.stringify(store) })
 }
 
-export async function uploadPortfolioImage(file: File) {
+export async function uploadPortfolioImage(file: File, onProgress?: (percent: number) => void) {
   if (file.size > 8 * 1024 * 1024) throw new Error('Images must be 8MB or smaller.')
   if (!file.type.startsWith('image/')) throw new Error('Only image files are allowed.')
-  const base64 = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(String(reader.result).split(',')[1] || '')
-    reader.onerror = () => reject(new Error('Could not read the image.'))
-    reader.readAsDataURL(file)
-  })
-  return request<{ url: string }>('/api/upload', {
+
+  const signed = await request<{ signedUrl: string; publicUrl: string }>('/api/upload-url', {
     method: 'POST',
-    body: JSON.stringify({ name: file.name, mime: file.type, base64 }),
+    body: JSON.stringify({ name: file.name, mime: file.type, size: file.size }),
   })
+
+  await new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('PUT', signed.signedUrl)
+    xhr.setRequestHeader('Content-Type', file.type)
+    xhr.setRequestHeader('Cache-Control', '3600')
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress?.(Math.round((event.loaded / event.total) * 100))
+    }
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        onProgress?.(100)
+        resolve()
+      } else {
+        reject(new Error(xhr.responseText || `Supabase upload failed (HTTP ${xhr.status}).`))
+      }
+    }
+    xhr.onerror = () => reject(new Error('Could not connect to Supabase Storage.'))
+    xhr.onabort = () => reject(new Error('Upload cancelled.'))
+    xhr.send(file)
+  })
+
+  return { url: signed.publicUrl }
 }
