@@ -71,7 +71,7 @@ export function Navbar() {
 
             <div className="hidden items-center gap-6 md:flex">
               <div className="flex items-center gap-1 rounded-full border border-slate-800 bg-slate-950/60 p-1">
-                {navItems.map((item) => <a key={item.label} href={item.href} className={\`rounded-full px-3 py-2 text-sm font-medium transition-all \${active === item.href ? 'bg-blue-500/15 text-blue-200 shadow-[inset_0_0_0_1px_rgba(96,165,250,0.4)]' : 'text-slate-300 hover:text-blue-300'}\`}>{item.label}</a>)}
+                {navItems.map((item) => <a key={item.label} href={item.href} className={`rounded-full px-3 py-2 text-sm font-medium transition-all ${active === item.href ? 'bg-blue-500/15 text-blue-200 shadow-[inset_0_0_0_1px_rgba(96,165,250,0.4)]' : 'text-slate-300 hover:text-blue-300'}`}>{item.label}</a>)}
               </div>
               <a href="#contact" className="rounded-xl border border-blue-400/40 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-200">Let's Talk</a>
               <button type="button" onClick={openOwnerLogin} className="inline-flex items-center gap-2 rounded-xl border border-slate-600 bg-slate-900/80 px-4 py-2 text-sm font-semibold text-slate-200 hover:border-blue-400/60"><LockKeyhole size={16} /> Owner</button>
@@ -82,7 +82,7 @@ export function Navbar() {
             </button>
           </div>
 
-          <div className={\`overflow-hidden transition-all duration-300 md:hidden \${isOpen ? 'max-h-[34rem] opacity-100' : 'max-h-0 opacity-0'}\`}>
+          <div className={`overflow-hidden transition-all duration-300 md:hidden ${isOpen ? 'max-h-[34rem] opacity-100' : 'max-h-0 opacity-0'}`}>
             <div className="space-y-1 border-t border-slate-700/60 pb-4 pt-3">
               {navItems.map((item) => <a key={item.label} href={item.href} onClick={() => setIsOpen(false)} className="block rounded-xl px-3 py-2.5 text-base font-medium text-slate-200 hover:bg-slate-800 hover:text-blue-300">{item.label}</a>)}
               <a href="#contact" onClick={() => setIsOpen(false)} className="mt-2 block rounded-xl border border-blue-400/40 bg-blue-500/10 px-3 py-2.5 text-center text-base font-semibold text-blue-200">Let's Talk</a>
