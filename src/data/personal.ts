@@ -2,11 +2,11 @@ import type { PersonalInfo } from '../types'
 
 export const personalInfo: PersonalInfo = {
   name: 'PRUDEN JACK GIDEON',
-  shortName: 'Pruden',
-  role: 'ICT Student · Software Developer · AI Builder',
+  shortName: 'Jark',
+  role: 'Software Developer · AI Builder · Technology Entrepreneur',
   location: 'Kenya',
-  bio: 'I build software, AI experiments, and digital products from Kenya — turning ambitious ideas into working interfaces, useful systems, and real prototypes.',
+  bio: 'I build software, AI systems, and digital products from Kenya — turning ambitious ideas into useful interfaces, practical automation, and working prototypes.',
   email: '',
   phone: '',
-  availability: 'Open to internships, collaborations, freelance builds, and technology opportunities.',
+  availability: 'Open to collaborations, freelance builds, product partnerships, and technology opportunities.',
 }
