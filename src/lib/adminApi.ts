@@ -35,6 +35,14 @@ async function request<T>(path: string, init: RequestInit = {}) {
   return body as T
 }
 
+export function getSetupStatus() {
+  return request<{ setupRequired: boolean }>('/auth/setup-status')
+}
+
+export function setupOwner(email: string, password: string) {
+  return request<AuthSession>('/auth/setup', { method: 'POST', body: JSON.stringify({ email, password }) })
+}
+
 export function loginOwner(email: string, password: string) {
   return request<AuthSession>('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) })
 }
