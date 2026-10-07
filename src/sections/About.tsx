@@ -1,58 +1,58 @@
-import { ArrowUpRight, MapPin, Sparkles } from 'lucide-react'
-import { PageContainer } from '../components/layout/PageContainer'
-import { SectionHeading } from '../components/ui/SectionHeading'
-import { personalInfo } from '../data/personal'
+import { FeatureShowcase } from '../components/ui/feature-showcase'
+
+const tabs = [
+  {
+    value: 'builder',
+    label: 'Builder',
+    src: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=85',
+    alt: 'Technology circuit board',
+  },
+  {
+    value: 'ai',
+    label: 'AI',
+    src: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1200&q=85',
+    alt: 'Artificial intelligence visualization',
+  },
+  {
+    value: 'systems',
+    label: 'Systems',
+    src: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=85',
+    alt: 'Server infrastructure',
+  },
+]
+
+const steps = [
+  {
+    id: 'identity',
+    title: 'ICT student becoming a software developer',
+    text: 'I am building a practical foundation across programming, operating systems, computer applications and modern software engineering while turning what I learn into working projects.',
+  },
+  {
+    id: 'build',
+    title: 'Ideas become working systems',
+    text: 'I enjoy taking an ambitious idea, breaking it into smaller components, then designing and building interfaces, APIs, automation and digital products that people can actually use.',
+  },
+  {
+    id: 'future',
+    title: 'Building from Kenya for a wider audience',
+    text: 'My long-term direction sits at the intersection of software, artificial intelligence, intelligent interfaces and technology entrepreneurship through the PRUDEN ecosystem.',
+  },
+]
 
 export function About() {
   return (
-    <section id="about" className="py-20 md:py-32">
-      <PageContainer>
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[0.85fr_1.15fr]">
-          <div className="card-surface card-radius relative min-h-[360px] overflow-hidden p-8">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(47,140,255,0.22),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(226,61,86,0.16),transparent_30%)]" />
-            <div className="relative flex h-full min-h-[300px] flex-col justify-between">
-              <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-slate-500">
-                <span>PRUDEN / 001</span>
-                <span>Profile</span>
-              </div>
-              <div>
-                <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-blue-400/30 bg-blue-500/10 text-blue-300">
-                  <Sparkles size={28} />
-                </div>
-                <p className="max-w-sm text-2xl font-semibold leading-tight text-slate-100">
-                  Building the bridge between imagination and working technology.
-                </p>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-slate-400">
-                <MapPin size={15} className="text-blue-400" />
-                {personalInfo.location}
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <SectionHeading eyebrow="About the builder" title="I build, test, learn, and build again." centered={false} />
-            <div className="mt-7 space-y-5 text-slate-300">
-              <p className="text-lg leading-relaxed">{personalInfo.bio}</p>
-              <p className="leading-relaxed">
-                My work sits across frontend engineering, AI experimentation, backend foundations, and product design.
-                I enjoy taking an ambitious idea, breaking it into smaller systems, and turning those systems into something people can actually use.
-              </p>
-              <p className="leading-relaxed">
-                I am especially interested in AI-assisted development, intelligent interfaces, developer tools, and technology products built from Kenya for a wider audience.
-              </p>
-              <div className="flex flex-wrap gap-3 pt-3">
-                <span className="rounded-full border border-slate-700 bg-slate-900/70 px-4 py-2 text-sm text-slate-300">Software development</span>
-                <span className="rounded-full border border-slate-700 bg-slate-900/70 px-4 py-2 text-sm text-slate-300">Artificial intelligence</span>
-                <span className="rounded-full border border-slate-700 bg-slate-900/70 px-4 py-2 text-sm text-slate-300">Digital products</span>
-              </div>
-              <a href="#projects" className="inline-flex items-center gap-2 pt-3 text-sm font-semibold text-blue-300 hover:text-blue-200">
-                Explore the work <ArrowUpRight size={16} />
-              </a>
-            </div>
-          </div>
-        </div>
-      </PageContainer>
+    <section id="about" className="relative overflow-hidden py-8 md:py-14">
+      <div className="pointer-events-none absolute left-1/2 top-24 h-96 w-96 -translate-x-1/2 rounded-full bg-blue-500/10 blur-3xl" aria-hidden="true" />
+      <FeatureShowcase
+        eyebrow="About the builder"
+        title="I build, test, learn, and build again."
+        description="I am PRUDEN JACK GIDEON — Jark. An ICT student, software developer in progress and AI builder from Kenya, focused on turning ambitious ideas into useful technology."
+        stats={['Kenya-based', 'Software + AI', 'Product focused']}
+        steps={steps}
+        tabs={tabs}
+        defaultTab="ai"
+        panelMinHeight={600}
+      />
     </section>
   )
 }
