@@ -9,7 +9,7 @@ export const projects: Project[] = [
     category: 'AI / Assistant',
     featured: true,
     status: 'In development',
-    githubUrl: 'https://github.com/jark-zenith/V.E.R.O.N.I.C.C.A',
+    githubUrl: 'https://veronicca-interface-v2.onrender.com/',
   },
   {
     id: 'pruden-ai-tech',
