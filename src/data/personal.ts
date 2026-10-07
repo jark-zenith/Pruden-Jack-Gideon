@@ -6,7 +6,7 @@ export const personalInfo: PersonalInfo = {
   role: 'ICT Student · Software Developer · AI Builder',
   location: 'Kenya',
   bio: 'I design and build software, AI interfaces, automation, and digital products from Kenya. My portfolio is a working record of ideas turned into prototypes, products, and experiments.',
-  email: '',
-  phone: '',
+  email: 'jarkpruden@gmail.com',
+  phone: '+254 180 574470',
   availability: 'Open to internships, attachment opportunities, freelance builds, collaborations, and ambitious technology projects.',
 }
