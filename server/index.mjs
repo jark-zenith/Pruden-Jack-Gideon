@@ -10,6 +10,9 @@ const FRONTEND_ORIGIN = String(process.env.FRONTEND_ORIGIN || '').replace(/\/$/,
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || ''
 const GITHUB_REPO = process.env.GITHUB_REPO || 'jark-zenith/Pruden-Jack-Gideon'
 const GITHUB_BRANCH = process.env.GITHUB_BRANCH || 'main'
+const SUPABASE_URL = String(process.env.SUPABASE_URL || '').replace(/\/$/, '')
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+const SUPABASE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'portfolio-media'
 const PORTFOLIO_PATH = 'public/portfolio.json'
 const AUTH_PATH = 'public/.owner-auth.json'
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000
@@ -247,7 +250,7 @@ const server = http.createServer(async (req, res) => {
       const name = String(body.name || 'upload')
       const base64 = String(body.base64 || '')
       if (!mime.startsWith('image/') || !base64 || Buffer.byteLength(base64, 'base64') > MAX_UPLOAD_BYTES) return json(res, 400, { error: 'Only images up to 8MB are accepted.' }, headers)
-      const imageUrl = await uploadToGitHub(name, base64)
+      const imageUrl = await uploadToSupabase(name, mime, base64)
       return json(res, 200, { url: imageUrl }, headers)
     }
     return json(res, 404, { error: 'Not found' }, headers)
