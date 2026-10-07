@@ -3,7 +3,7 @@ import crypto from 'node:crypto'
 import { URL } from 'node:url'
 
 const PORT = Number(process.env.PORT || 10000)
-const ADMIN_EMAIL = String(process.env.ADMIN_EMAIL || 'jarkpruden@gmail.com').trim().toLowerCase()
+const DEFAULT_ADMIN_EMAIL = String(process.env.ADMIN_EMAIL || 'jarkpruden@gmail.com').trim().toLowerCase()
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || ''
 const SESSION_SECRET = process.env.SESSION_SECRET || ''
 const FRONTEND_ORIGIN = String(process.env.FRONTEND_ORIGIN || '').replace(/\/$/, '')
@@ -11,6 +11,7 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN || ''
 const GITHUB_REPO = process.env.GITHUB_REPO || 'jark-zenith/Pruden-Jack-Gideon'
 const GITHUB_BRANCH = process.env.GITHUB_BRANCH || 'main'
 const PORTFOLIO_PATH = 'public/portfolio.json'
+const AUTH_PATH = 'public/.owner-auth.json'
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024
 
@@ -23,21 +24,15 @@ function json(res, status, body, extraHeaders = {}) {
 
 function corsHeaders(origin) {
   if (!FRONTEND_ORIGIN || origin === FRONTEND_ORIGIN) {
-    return {
-      'Access-Control-Allow-Origin': FRONTEND_ORIGIN || origin || '*',
-      'Access-Control-Allow-Credentials': 'true',
-      'Vary': 'Origin',
-    }
+    return { 'Access-Control-Allow-Origin': FRONTEND_ORIGIN || origin || '*', 'Access-Control-Allow-Credentials': 'true', Vary: 'Origin' }
   }
   return {}
 }
 
-function hashPassword(password) {
-  if (!password) return ''
-  return crypto.scryptSync(password, SESSION_SECRET || 'missing-secret', 64).toString('hex')
+function passwordVerifier(password) {
+  if (!SESSION_SECRET || !password) return ''
+  return crypto.createHmac('sha256', SESSION_SECRET).update(password).digest('hex')
 }
-
-const passwordHash = hashPassword(ADMIN_PASSWORD)
 
 function safeEqual(a, b) {
   const aa = Buffer.from(a)
@@ -123,6 +118,47 @@ async function github(path, options = {}) {
   return data
 }
 
+async function getFileIfExists(path) {
+  try {
+    return await github(path + '?ref=' + encodeURIComponent(GITHUB_BRANCH))
+  } catch (error) {
+    if (error instanceof Error && /Not Found/i.test(error.message)) return null
+    throw error
+  }
+}
+
+async function getOwnerAuth() {
+  const stored = await getFileIfExists(AUTH_PATH)
+  if (stored?.content) {
+    try {
+      const parsed = JSON.parse(Buffer.from(stored.content, 'base64').toString('utf8'))
+      if (parsed?.email && parsed?.verifier) return { email: String(parsed.email).trim().toLowerCase(), verifier: String(parsed.verifier), sha: stored.sha }
+    } catch {}
+  }
+
+  if (ADMIN_PASSWORD && SESSION_SECRET) {
+    return { email: DEFAULT_ADMIN_EMAIL, verifier: passwordVerifier(ADMIN_PASSWORD), sha: null }
+  }
+
+  return null
+}
+
+async function createOwnerAuth(email, password) {
+  if (!GITHUB_TOKEN) throw new Error('GITHUB_TOKEN is not configured')
+  if (!SESSION_SECRET) throw new Error('SESSION_SECRET is not configured')
+  const existing = await getFileIfExists(AUTH_PATH)
+  if (existing) throw new Error('Owner account is already configured.')
+  const content = Buffer.from(JSON.stringify({
+    version: 1,
+    email,
+    verifier: passwordVerifier(password),
+  }, null, 2) + '\n').toString('base64')
+  await github(AUTH_PATH, {
+    method: 'PUT',
+    body: JSON.stringify({ message: 'feat: initialize owner account', content, branch: GITHUB_BRANCH }),
+  })
+}
+
 async function getPortfolio() {
   try {
     const file = await github(PORTFOLIO_PATH + '?ref=' + encodeURIComponent(GITHUB_BRANCH))
@@ -135,28 +171,13 @@ async function getPortfolio() {
 async function savePortfolio(portfolio, message) {
   const existing = await github(PORTFOLIO_PATH + '?ref=' + encodeURIComponent(GITHUB_BRANCH))
   const content = Buffer.from(JSON.stringify(portfolio, null, 2) + '\n').toString('base64')
-  await github(PORTFOLIO_PATH, {
-    method: 'PUT',
-    body: JSON.stringify({
-      message,
-      content,
-      sha: existing.sha,
-      branch: GITHUB_BRANCH,
-    }),
-  })
+  await github(PORTFOLIO_PATH, { method: 'PUT', body: JSON.stringify({ message, content, sha: existing.sha, branch: GITHUB_BRANCH }) })
 }
 
-async function uploadToGitHub(name, mime, base64) {
+async function uploadToGitHub(name, base64) {
   const safeName = name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/-+/g, '-').slice(-100)
   const path = 'public/uploads/admin/' + Date.now() + '-' + safeName
-  await github(path, {
-    method: 'PUT',
-    body: JSON.stringify({
-      message: 'chore: upload portfolio media',
-      content: base64,
-      branch: GITHUB_BRANCH,
-    }),
-  })
+  await github(path, { method: 'PUT', body: JSON.stringify({ message: 'chore: upload portfolio media', content: base64, branch: GITHUB_BRANCH }) })
   return 'https://raw.githubusercontent.com/' + GITHUB_REPO + '/' + GITHUB_BRANCH + '/' + path
 }
 
@@ -175,36 +196,57 @@ const server = http.createServer(async (req, res) => {
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown'
 
   try {
-    if (url.pathname === '/health') return json(res, 200, { ok: true, configured: Boolean(ADMIN_PASSWORD && SESSION_SECRET) }, headers)
+    if (url.pathname === '/health') {
+      const auth = await getOwnerAuth().catch(() => null)
+      return json(res, 200, { ok: true, configured: Boolean(auth && SESSION_SECRET) }, headers)
+    }
+
+    if (url.pathname === '/auth/setup-status' && req.method === 'GET') {
+      const auth = await getOwnerAuth()
+      return json(res, 200, { setupRequired: !auth }, headers)
+    }
+
+    if (url.pathname === '/auth/setup' && req.method === 'POST') {
+      if (rateLimited(ip)) return json(res, 429, { error: 'Too many failed attempts. Try again later.' }, headers)
+      const body = await readBody(req)
+      const email = String(body.email || '').trim().toLowerCase()
+      const password = String(body.password || '')
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json(res, 400, { error: 'Enter a valid owner email.' }, headers)
+      if (password.length < 12) return json(res, 400, { error: 'Choose a password of at least 12 characters.' }, headers)
+      const existing = await getOwnerAuth()
+      if (existing) return json(res, 409, { error: 'Owner setup has already been completed. Use Owner Sign In.' }, headers)
+      await createOwnerAuth(email, password)
+      const cookie = 'pruden_owner_session=' + encodeURIComponent(makeSession()) + '; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=' + Math.floor(SESSION_TTL_MS / 1000)
+      return json(res, 201, { ok: true, ownerId: email, expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString() }, { ...headers, 'Set-Cookie': cookie })
+    }
 
     if (url.pathname === '/auth/login' && req.method === 'POST') {
       if (rateLimited(ip)) return json(res, 429, { error: 'Too many failed attempts. Try again later.' }, headers)
       const body = await readBody(req)
       const email = String(body.email || '').trim().toLowerCase()
       const password = String(body.password || '')
-      const ok = email === ADMIN_EMAIL && Boolean(ADMIN_PASSWORD) && Boolean(SESSION_SECRET) && safeEqual(hashPassword(password), passwordHash)
+      const auth = await getOwnerAuth()
+      const ok = Boolean(auth && SESSION_SECRET && email === auth.email && safeEqual(passwordVerifier(password), auth.verifier))
       if (!ok) {
         recordFailure(ip)
         return json(res, 401, { error: 'Invalid owner credentials.' }, headers)
       }
       failed.delete(ip)
       const cookie = 'pruden_owner_session=' + encodeURIComponent(makeSession()) + '; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=' + Math.floor(SESSION_TTL_MS / 1000)
-      return json(res, 200, { ok: true, ownerId: ADMIN_EMAIL, expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString() }, { ...headers, 'Set-Cookie': cookie })
+      return json(res, 200, { ok: true, ownerId: auth.email, expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString() }, { ...headers, 'Set-Cookie': cookie })
     }
 
     if (url.pathname === '/auth/me' && req.method === 'GET') {
       if (!authenticated(req)) return json(res, 401, { authenticated: false }, headers)
-      return json(res, 200, { authenticated: true, ownerId: ADMIN_EMAIL, expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString() }, headers)
+      const auth = await getOwnerAuth()
+      return json(res, 200, { authenticated: true, ownerId: auth?.email || DEFAULT_ADMIN_EMAIL, expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString() }, headers)
     }
 
     if (url.pathname === '/auth/logout' && req.method === 'POST') {
       return json(res, 200, { ok: true }, { ...headers, 'Set-Cookie': 'pruden_owner_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0' })
     }
 
-    if (url.pathname === '/api/portfolio' && req.method === 'GET') {
-      const portfolio = await getPortfolio()
-      return json(res, 200, portfolio, headers)
-    }
+    if (url.pathname === '/api/portfolio' && req.method === 'GET') return json(res, 200, await getPortfolio(), headers)
 
     if (url.pathname === '/api/portfolio' && req.method === 'PUT') {
       if (!authenticated(req)) return json(res, 401, { error: 'Owner authentication required.' }, headers)
@@ -225,8 +267,8 @@ const server = http.createServer(async (req, res) => {
       const name = String(body.name || 'upload')
       const base64 = String(body.base64 || '')
       if (!mime.startsWith('image/') || !base64 || Buffer.byteLength(base64, 'base64') > MAX_UPLOAD_BYTES) return json(res, 400, { error: 'Only images up to 8MB are accepted.' }, headers)
-      const url = await uploadToGitHub(name, mime, base64)
-      return json(res, 200, { url }, headers)
+      const imageUrl = await uploadToGitHub(name, base64)
+      return json(res, 200, { url: imageUrl }, headers)
     }
 
     return json(res, 404, { error: 'Not found' }, headers)
