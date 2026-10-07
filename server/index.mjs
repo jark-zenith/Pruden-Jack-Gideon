@@ -14,7 +14,6 @@ const PORTFOLIO_PATH = 'public/portfolio.json'
 const AUTH_PATH = 'public/.owner-auth.json'
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024
-
 const failed = new Map()
 
 function json(res, status, body, extraHeaders = {}) {
@@ -58,7 +57,7 @@ function validSession(token) {
 function cookies(req) {
   return Object.fromEntries(String(req.headers.cookie || '').split(';').map(v => v.trim()).filter(Boolean).map(v => {
     const i = v.indexOf('=')
-    return i === -1 ? [v, ''] : [v.slice(0, i), decodeURIComponent(v.slice(i + 1))]
+    return i === -1 ? [v, ''] : [v.slice(0, i), decodeURIComponent(v.slice(i + 1))] 
   }))
 }
 
@@ -135,11 +134,7 @@ async function getOwnerAuth() {
       if (parsed?.email && parsed?.verifier) return { email: String(parsed.email).trim().toLowerCase(), verifier: String(parsed.verifier), sha: stored.sha }
     } catch {}
   }
-
-  if (ADMIN_PASSWORD && SESSION_SECRET) {
-    return { email: DEFAULT_ADMIN_EMAIL, verifier: passwordVerifier(ADMIN_PASSWORD), sha: null }
-  }
-
+  if (ADMIN_PASSWORD && SESSION_SECRET) return { email: DEFAULT_ADMIN_EMAIL, verifier: passwordVerifier(ADMIN_PASSWORD), sha: null }
   return null
 }
 
@@ -148,15 +143,8 @@ async function createOwnerAuth(email, password) {
   if (!SESSION_SECRET) throw new Error('SESSION_SECRET is not configured')
   const existing = await getFileIfExists(AUTH_PATH)
   if (existing) throw new Error('Owner account is already configured.')
-  const content = Buffer.from(JSON.stringify({
-    version: 1,
-    email,
-    verifier: passwordVerifier(password),
-  }, null, 2) + '\n').toString('base64')
-  await github(AUTH_PATH, {
-    method: 'PUT',
-    body: JSON.stringify({ message: 'feat: initialize owner account', content, branch: GITHUB_BRANCH }),
-  })
+  const content = Buffer.from(JSON.stringify({ version: 1, email, verifier: passwordVerifier(password) }, null, 2) + '\n').toString('base64')
+  await github(AUTH_PATH, { method: 'PUT', body: JSON.stringify({ message: 'feat: initialize owner account', content, branch: GITHUB_BRANCH }) })
 }
 
 async function getPortfolio() {
@@ -181,15 +169,17 @@ async function uploadToGitHub(name, base64) {
   return 'https://raw.githubusercontent.com/' + GITHUB_REPO + '/' + GITHUB_BRANCH + '/' + path
 }
 
+function sessionCookie(value, maxAge = Math.floor(SESSION_TTL_MS / 1000)) {
+  return 'pruden_owner_session=' + encodeURIComponent(value) + '; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=' + maxAge
+}
+
 const server = http.createServer(async (req, res) => {
   const origin = req.headers.origin || ''
   const headers = corsHeaders(origin)
-
   if (req.method === 'OPTIONS') {
     res.writeHead(204, { ...headers, 'Access-Control-Allow-Methods': 'GET,POST,PUT,OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Max-Age': '86400' })
     return res.end()
   }
-
   if (FRONTEND_ORIGIN && origin && origin !== FRONTEND_ORIGIN) return json(res, 403, { error: 'Origin not allowed' }, headers)
 
   const url = new URL(req.url || '/', 'http://localhost')
@@ -200,12 +190,10 @@ const server = http.createServer(async (req, res) => {
       const auth = await getOwnerAuth().catch(() => null)
       return json(res, 200, { ok: true, configured: Boolean(auth && SESSION_SECRET) }, headers)
     }
-
     if (url.pathname === '/auth/setup-status' && req.method === 'GET') {
       const auth = await getOwnerAuth()
       return json(res, 200, { setupRequired: !auth }, headers)
     }
-
     if (url.pathname === '/auth/setup' && req.method === 'POST') {
       if (rateLimited(ip)) return json(res, 429, { error: 'Too many failed attempts. Try again later.' }, headers)
       const body = await readBody(req)
@@ -216,10 +204,8 @@ const server = http.createServer(async (req, res) => {
       const existing = await getOwnerAuth()
       if (existing) return json(res, 409, { error: 'Owner setup has already been completed. Use Owner Sign In.' }, headers)
       await createOwnerAuth(email, password)
-      const cookie = 'pruden_owner_session=' + encodeURIComponent(makeSession()) + '; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=' + Math.floor(SESSION_TTL_MS / 1000)
-      return json(res, 201, { ok: true, ownerId: email, expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString() }, { ...headers, 'Set-Cookie': cookie })
+      return json(res, 201, { ok: true, ownerId: email, expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString() }, { ...headers, 'Set-Cookie': sessionCookie(makeSession()) })
     }
-
     if (url.pathname === '/auth/login' && req.method === 'POST') {
       if (rateLimited(ip)) return json(res, 429, { error: 'Too many failed attempts. Try again later.' }, headers)
       const body = await readBody(req)
@@ -232,22 +218,17 @@ const server = http.createServer(async (req, res) => {
         return json(res, 401, { error: 'Invalid owner credentials.' }, headers)
       }
       failed.delete(ip)
-      const cookie = 'pruden_owner_session=' + encodeURIComponent(makeSession()) + '; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=' + Math.floor(SESSION_TTL_MS / 1000)
-      return json(res, 200, { ok: true, ownerId: auth.email, expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString() }, { ...headers, 'Set-Cookie': cookie })
+      return json(res, 200, { ok: true, ownerId: auth.email, expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString() }, { ...headers, 'Set-Cookie': sessionCookie(makeSession()) })
     }
-
     if (url.pathname === '/auth/me' && req.method === 'GET') {
       if (!authenticated(req)) return json(res, 401, { authenticated: false }, headers)
       const auth = await getOwnerAuth()
       return json(res, 200, { authenticated: true, ownerId: auth?.email || DEFAULT_ADMIN_EMAIL, expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString() }, headers)
     }
-
     if (url.pathname === '/auth/logout' && req.method === 'POST') {
-      return json(res, 200, { ok: true }, { ...headers, 'Set-Cookie': 'pruden_owner_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0' })
+      return json(res, 200, { ok: true }, { ...headers, 'Set-Cookie': sessionCookie('', 0) })
     }
-
     if (url.pathname === '/api/portfolio' && req.method === 'GET') return json(res, 200, await getPortfolio(), headers)
-
     if (url.pathname === '/api/portfolio' && req.method === 'PUT') {
       if (!authenticated(req)) return json(res, 401, { error: 'Owner authentication required.' }, headers)
       const body = await readBody(req)
@@ -259,7 +240,6 @@ const server = http.createServer(async (req, res) => {
       await savePortfolio(next, 'feat: update portfolio from owner dashboard')
       return json(res, 200, next, headers)
     }
-
     if (url.pathname === '/api/upload' && req.method === 'POST') {
       if (!authenticated(req)) return json(res, 401, { error: 'Owner authentication required.' }, headers)
       const body = await readBody(req)
@@ -270,7 +250,6 @@ const server = http.createServer(async (req, res) => {
       const imageUrl = await uploadToGitHub(name, base64)
       return json(res, 200, { url: imageUrl }, headers)
     }
-
     return json(res, 404, { error: 'Not found' }, headers)
   } catch (error) {
     console.error(error)
