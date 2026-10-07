@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Menu, X, ChevronDown } from 'lucide-react'
+import { getPortfolioStore } from '../lib/adminApi'
 
 interface BlurTextProps {
   text: string
@@ -76,11 +77,13 @@ const menuItems = [
 export function Hero() {
   const [isDark, setIsDark] = useState(true)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [profileImage, setProfileImage] = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     document.documentElement.classList.add('dark')
+    getPortfolioStore().then((store) => setProfileImage(store.profileImage)).catch(() => undefined)
   }, [])
 
   useEffect(() => {
@@ -199,11 +202,15 @@ export function Hero() {
           <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
             <div className="group relative flex h-[145px] w-[88px] items-center justify-center overflow-hidden rounded-full border border-white/20 bg-neutral-950 shadow-2xl shadow-black transition-transform duration-300 hover:scale-105 sm:h-[190px] sm:w-[115px] md:h-[235px] md:w-[142px]">
               <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(195,228,29,0.18),transparent_65%)]" />
-              <div className="relative text-6xl font-black tracking-[-0.1em] text-white sm:text-7xl md:text-8xl">
-                P<span className="text-[#C3E41D]">.</span>
-              </div>
-              <span className="absolute bottom-4 left-0 right-0 text-[7px] font-semibold uppercase tracking-[0.28em] text-neutral-500">
-                Owner upload
+              {profileImage ? (
+                <img src={profileImage} alt="PRUDEN JACK GIDEON" className="relative h-full w-full object-cover" />
+              ) : (
+                <div className="relative text-6xl font-black tracking-[-0.1em] text-white sm:text-7xl md:text-8xl">
+                  P<span className="text-[#C3E41D]">.</span>
+                </div>
+              )}
+              <span className="absolute bottom-4 left-0 right-0 text-center text-[7px] font-semibold uppercase tracking-[0.28em] text-neutral-200 drop-shadow-md">
+                {profileImage ? 'Owner profile' : 'Owner upload'}
               </span>
             </div>
           </div>
