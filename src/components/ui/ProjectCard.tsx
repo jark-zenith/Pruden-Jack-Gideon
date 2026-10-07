@@ -43,7 +43,7 @@ export function ProjectCard({ project, index = 0 }: ProjectCardProps) {
       <div
         className="relative h-full overflow-hidden rounded-[26px] border border-slate-800/90 bg-[#080b12] shadow-[0_20px_70px_rgba(0,0,0,0.35)] transition-colors duration-500 group-hover:border-blue-400/30"
         style={{
-          backgroundImage: \`radial-gradient(circle at \${spotlight.x}% \${spotlight.y}%, rgba(47,140,255,0.16), transparent 34%), linear-gradient(145deg, rgba(15,23,42,0.98), rgba(3,7,18,0.98))\`,
+          backgroundImage: `radial-gradient(circle at ${spotlight.x}% ${spotlight.y}%, rgba(47,140,255,0.16), transparent 34%), linear-gradient(145deg, rgba(15,23,42,0.98), rgba(3,7,18,0.98))`,
         }}
       >
         <div className="relative aspect-[16/10] overflow-hidden border-b border-slate-800/80">
