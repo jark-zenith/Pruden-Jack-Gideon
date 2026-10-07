@@ -1,111 +1,236 @@
-import { ArrowDown, ArrowRight, Code2, Cpu, MapPin, Sparkles } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { PageContainer } from '../components/layout/PageContainer'
-import { Button } from '../components/ui/Button'
-import { SocialLinks } from '../components/ui/SocialLinks'
-import { personalInfo } from '../data/personal'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { Menu, X, ChevronDown } from 'lucide-react'
 
-const stats = [
-  { value: 'AI', label: 'Systems & assistants', icon: Cpu },
-  { value: 'WEB', label: 'Products & interfaces', icon: Code2 },
-  { value: 'KE', label: 'Built from Kenya', icon: MapPin },
+interface BlurTextProps {
+  text: string
+  delay?: number
+  animateBy?: 'words' | 'letters'
+  direction?: 'top' | 'bottom'
+  className?: string
+  style?: React.CSSProperties
+}
+
+const BlurText: React.FC<BlurTextProps> = ({
+  text,
+  delay = 50,
+  animateBy = 'words',
+  direction = 'top',
+  className = '',
+  style,
+}) => {
+  const [inView, setInView] = useState(false)
+  const ref = useRef<HTMLParagraphElement>(null)
+
+  useEffect(() => {
+    const node = ref.current
+    if (!node) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setInView(true)
+      },
+      { threshold: 0.1 },
+    )
+
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+
+  const segments = useMemo(
+    () => (animateBy === 'words' ? text.split(' ') : text.split('')),
+    [text, animateBy],
+  )
+
+  return (
+    <p ref={ref} className={`inline-flex flex-wrap ${className}`} style={style}>
+      {segments.map((segment, index) => (
+        <span
+          key={`${segment}-${index}`}
+          style={{
+            display: 'inline-block',
+            filter: inView ? 'blur(0px)' : 'blur(10px)',
+            opacity: inView ? 1 : 0,
+            transform: inView
+              ? 'translateY(0)'
+              : `translateY(${direction === 'top' ? '-20px' : '20px'})`,
+            transition: `all 0.5s ease-out ${index * delay}ms`,
+          }}
+        >
+          {segment}
+          {animateBy === 'words' && index < segments.length - 1 ? '\u00A0' : ''}
+        </span>
+      ))}
+    </p>
+  )
+}
+
+const menuItems = [
+  { label: 'HOME', href: '#home' },
+  { label: 'ABOUT', href: '#about' },
+  { label: 'PROJECTS', href: '#projects' },
+  { label: 'EXPERIENCE', href: '#experience' },
+  { label: 'EDUCATION', href: '#education' },
+  { label: 'CONTACT', href: '#contact' },
 ]
 
 export function Hero() {
+  const [isDark, setIsDark] = useState(true)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    document.documentElement.classList.add('dark')
+  }, [])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isMenuOpen &&
+        menuRef.current &&
+        buttonRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setIsMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isMenuOpen])
+
+  const toggleTheme = () => {
+    const nextDark = !isDark
+    setIsDark(nextDark)
+    document.documentElement.classList.toggle('dark', nextDark)
+  }
+
   return (
-    <section id="home" className="relative overflow-hidden py-20 md:py-28 lg:py-36">
-      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute left-1/2 top-0 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-blue-500/10 blur-[110px]" />
-        <div className="absolute right-[-10rem] top-24 h-96 w-96 rounded-full bg-blue-400/10 blur-[100px]" />
-        <div className="hero-orbit absolute left-[58%] top-[42%] hidden h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-blue-400/10 lg:block" />
-      </div>
+    <section id="home" className="relative min-h-screen overflow-hidden bg-black text-white transition-colors duration-500 dark:bg-black">
+      <div
+        className="pointer-events-none absolute inset-0"
+        aria-hidden="true"
+        style={{
+          background:
+            'radial-gradient(circle at 50% 45%, rgba(195,228,29,0.055), transparent 30%), radial-gradient(circle at 50% 100%, rgba(255,255,255,0.04), transparent 40%)',
+        }}
+      />
 
-      <PageContainer className="relative z-10">
-        <div className="grid items-center gap-14 lg:grid-cols-[1.15fr_0.85fr]">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-          >
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-400/20 bg-blue-500/[0.06] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-blue-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-400 shadow-[0_0_12px_rgba(96,165,250,0.9)]" />
-              Building from Kenya · 2026
-            </div>
+      <header className="absolute left-0 right-0 top-0 z-50 px-5 py-5 sm:px-8 sm:py-7">
+        <nav className="mx-auto flex max-w-screen-2xl items-center justify-between">
+          <div className="relative">
+            <button
+              ref={buttonRef}
+              type="button"
+              onClick={() => setIsMenuOpen((open) => !open)}
+              className="z-50 p-2 text-neutral-500 transition-colors duration-300 hover:text-white"
+              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+            >
+              {isMenuOpen ? <X className="h-8 w-8" strokeWidth={2} /> : <Menu className="h-8 w-8" strokeWidth={2} />}
+            </button>
 
-            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">Hello, I'm</p>
-            <h1 className="max-w-4xl text-5xl font-black leading-[0.95] tracking-[-0.04em] text-white sm:text-6xl lg:text-8xl">
-              PRUDEN
-              <span className="block bg-gradient-to-r from-white via-slate-200 to-blue-400 bg-clip-text text-transparent">JACK GIDEON.</span>
-            </h1>
-
-            <p className="mt-7 max-w-2xl text-xl font-medium leading-relaxed text-slate-300 md:text-2xl">
-              {personalInfo.role}
-            </p>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-400 md:text-lg">
-              {personalInfo.bio}
-            </p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button href="#projects" variant="primary" className="btn-soft">
-                Explore My Work <ArrowRight size={17} />
-              </Button>
-              <Button href="#contact" variant="ghost" className="btn-soft">
-                Start a Conversation
-              </Button>
-            </div>
-
-            <div className="mt-8">
-              <SocialLinks className="gap-3" />
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.94, rotate: 1 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{ duration: 0.8, delay: 0.15 }}
-            className="relative mx-auto w-full max-w-md"
-          >
-            <div className="relative overflow-hidden rounded-[2rem] border border-slate-700/70 bg-slate-950/70 p-4 shadow-2xl shadow-blue-950/30 backdrop-blur-xl">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.18),transparent_55%)]" />
-              <div className="relative rounded-[1.5rem] border border-blue-400/15 bg-[#07101f]/80 p-6">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-5">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-blue-400">PRUDEN / PORTFOLIO</p>
-                    <p className="mt-1 text-sm text-slate-400">Builder console</p>
-                  </div>
-                  <Sparkles size={18} className="text-blue-300" />
-                </div>
-
-                <div className="py-12 text-center">
-                  <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-[2rem] border border-blue-400/30 bg-blue-500/[0.08] text-4xl font-black text-blue-200 shadow-[0_0_60px_rgba(59,130,246,0.14)]">
-                    P
-                  </div>
-                  <p className="mt-6 text-lg font-bold text-white">Ideas → Systems → Products</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">A living portfolio of software, AI experiments, and the PRUDEN ecosystem.</p>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2">
-                  {stats.map(({ value, label, icon: Icon }) => (
-                    <div key={value} className="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
-                      <Icon size={14} className="mb-2 text-blue-400" />
-                      <p className="text-xs font-bold text-slate-200">{value}</p>
-                      <p className="mt-1 text-[10px] leading-4 text-slate-500">{label}</p>
-                    </div>
-                  ))}
-                </div>
+            {isMenuOpen && (
+              <div
+                ref={menuRef}
+                className="absolute left-0 top-full z-[100] mt-2 ml-1 w-[220px] rounded-2xl border border-white/10 bg-black/95 p-4 shadow-2xl backdrop-blur-xl"
+              >
+                {menuItems.map((item, index) => (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`block rounded-lg px-3 py-2 text-lg font-bold tracking-tight transition-colors hover:text-[#C3E41D] ${index === 0 ? 'text-[#C3E41D]' : 'text-white'}`}
+                  >
+                    {item.label}
+                  </a>
+                ))}
               </div>
+            )}
+          </div>
+
+          <div className="absolute left-1/2 -translate-x-1/2 text-3xl font-black tracking-[-0.08em] text-white sm:text-4xl">
+            P<span className="text-[#C3E41D]">.</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="relative h-8 w-16 rounded-full bg-neutral-900 transition-opacity hover:opacity-80"
+            aria-label="Toggle theme"
+          >
+            <div
+              className="absolute left-1 top-1 h-6 w-6 rounded-full bg-white transition-transform duration-300"
+              style={{ transform: isDark ? 'translateX(2rem)' : 'translateX(0)' }}
+            />
+          </button>
+        </nav>
+      </header>
+
+      <main className="relative flex min-h-screen flex-col items-center justify-center px-4 pt-20">
+        <div className="relative w-full text-center">
+          <div className="relative z-0">
+            <BlurText
+              text="PRUDEN"
+              delay={80}
+              animateBy="letters"
+              direction="top"
+              className="justify-center whitespace-nowrap text-[18vw] font-black uppercase leading-[0.72] tracking-[-0.075em] text-[#C3E41D] sm:text-[17vw] md:text-[16vw] lg:text-[15vw]"
+              style={{ fontFamily: "'Fira Code', monospace" }}
+            />
+            <BlurText
+              text="JACK"
+              delay={80}
+              animateBy="letters"
+              direction="top"
+              className="justify-center whitespace-nowrap text-[18vw] font-black uppercase leading-[0.72] tracking-[-0.075em] text-[#C3E41D] sm:text-[17vw] md:text-[16vw] lg:text-[15vw]"
+              style={{ fontFamily: "'Fira Code', monospace" }}
+            />
+            <BlurText
+              text="GIDEON"
+              delay={80}
+              animateBy="letters"
+              direction="top"
+              className="justify-center whitespace-nowrap text-[18vw] font-black uppercase leading-[0.72] tracking-[-0.075em] text-[#C3E41D] sm:text-[17vw] md:text-[16vw] lg:text-[15vw]"
+              style={{ fontFamily: "'Fira Code', monospace" }}
+            />
+          </div>
+
+          <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
+            <div className="group relative flex h-[145px] w-[88px] items-center justify-center overflow-hidden rounded-full border border-white/20 bg-neutral-950 shadow-2xl shadow-black transition-transform duration-300 hover:scale-105 sm:h-[190px] sm:w-[115px] md:h-[235px] md:w-[142px]">
+              <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(195,228,29,0.18),transparent_65%)]" />
+              <div className="relative text-6xl font-black tracking-[-0.1em] text-white sm:text-7xl md:text-8xl">
+                P<span className="text-[#C3E41D]">.</span>
+              </div>
+              <span className="absolute bottom-4 left-0 right-0 text-[7px] font-semibold uppercase tracking-[0.28em] text-neutral-500">
+                Owner upload
+              </span>
             </div>
-            <div className="absolute -bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-slate-700 bg-[#050914]/95 px-4 py-2 text-xs text-slate-400 shadow-xl">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              {personalInfo.availability}
-            </div>
-          </motion.div>
+          </div>
         </div>
 
-        <a href="#about" className="mx-auto mt-20 flex w-fit items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-blue-300">
-          Scroll to explore <ArrowDown size={14} />
-        </a>
-      </PageContainer>
+        <div className="absolute bottom-16 left-1/2 w-full -translate-x-1/2 px-6 sm:bottom-20 md:bottom-24">
+          <div className="flex justify-center">
+            <BlurText
+              text="Building software, AI systems and human experiences in code."
+              delay={70}
+              animateBy="words"
+              direction="top"
+              className="justify-center text-center text-[14px] text-neutral-500 transition-colors duration-300 hover:text-white sm:text-[17px] md:text-[20px]"
+              style={{ fontFamily: "'Antic', sans-serif" }}
+            />
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => document.querySelector('#about')?.scrollIntoView({ behavior: 'smooth' })}
+          className="absolute bottom-5 left-1/2 -translate-x-1/2 text-neutral-500 transition-colors hover:text-[#C3E41D]"
+          aria-label="Scroll to about"
+        >
+          <ChevronDown className="h-6 w-6 md:h-8 md:w-8" />
+        </button>
+      </main>
     </section>
   )
 }
