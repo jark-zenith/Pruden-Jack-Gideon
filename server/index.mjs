@@ -172,6 +172,37 @@ async function uploadToGitHub(name, base64) {
   return 'https://raw.githubusercontent.com/' + GITHUB_REPO + '/' + GITHUB_BRANCH + '/' + path
 }
 
+async function uploadToSupabase(name, mime, base64) {
+  if (!SUPABASE_URL) throw new Error('SUPABASE_URL is not configured')
+  if (!SUPABASE_SECRET_KEY) throw new Error('SUPABASE_SECRET_KEY is not configured on the admin API')
+
+  const original = String(name || 'upload')
+  const ext = (original.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin'
+  const safeBase = original.replace(/\.[^.]+$/, '').toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '-').replace(/-+/g, '-')
+    .replace(/^-|-$/g, '').slice(0, 80) || 'portfolio-image'
+  const path = `owner/${Date.now()}-${crypto.randomUUID()}-${safeBase}.${ext}`
+  const bytes = Buffer.from(base64, 'base64')
+
+  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${SUPABASE_BUCKET}/${path}`, {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + SUPABASE_SECRET_KEY,
+      apikey: SUPABASE_SECRET_KEY,
+      'Content-Type': mime,
+      'x-upsert': 'false',
+    },
+    body: bytes,
+  })
+
+  const data = await response.json().catch(() => ({}))
+  if (!response.ok) {
+    throw new Error(data.message || data.error || 'Supabase Storage upload failed')
+  }
+
+  return `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${path}`
+}
+
 function sessionCookie(value, maxAge = Math.floor(SESSION_TTL_MS / 1000)) {
   return 'pruden_owner_session=' + encodeURIComponent(value) + '; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=' + maxAge
 }
