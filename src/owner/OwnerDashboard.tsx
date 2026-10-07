@@ -28,6 +28,7 @@ export function OwnerDashboard({ session, onSignOut }: OwnerDashboardProps) {
   const [toast, setToast] = useState('')
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState(true)
+  const [uploadProgress, setUploadProgress] = useState(0)
   const profileInput = useRef<HTMLInputElement>(null)
   const projectInput = useRef<HTMLInputElement>(null)
 
@@ -56,12 +57,14 @@ export function OwnerDashboard({ session, onSignOut }: OwnerDashboardProps) {
   async function changeProfileImage(file?: File) {
     if (!file) return
     setBusy(true)
+    setUploadProgress(0)
     try {
-      const uploaded = await uploadPortfolioImage(file)
+      const uploaded = await uploadPortfolioImage(file, setUploadProgress)
       await saveStore({ ...store, profileImage: uploaded.url }, 'Hero profile image updated.')
     } catch (error) {
       notify(error instanceof Error ? error.message : 'Profile image upload failed.')
       setBusy(false)
+      setUploadProgress(0)
     }
   }
 
@@ -76,6 +79,7 @@ export function OwnerDashboard({ session, onSignOut }: OwnerDashboardProps) {
       notify(error instanceof Error ? error.message : 'Project image upload failed.')
     } finally {
       setBusy(false)
+      setUploadProgress(0)
     }
   }
 
@@ -119,7 +123,7 @@ export function OwnerDashboard({ session, onSignOut }: OwnerDashboardProps) {
         <div className="grid h-52 w-36 shrink-0 place-items-center overflow-hidden rounded-[50%] border border-blue-400/25 bg-slate-950">
           {store.profileImage ? <img src={store.profileImage} alt="Current owner profile" className="h-full w-full object-cover" /> : <UserRound size={42} className="text-slate-600" />}
         </div>
-        <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-300">Hero image</p><h3 className="mt-2 text-2xl font-bold text-white">Owner profile picture</h3><p className="mt-2 max-w-xl text-sm leading-6 text-slate-400">Upload a new profile image. The dashboard sends it to protected owner storage, updates the portfolio record, and triggers the normal Render rebuild.</p><button type="button" disabled={busy} onClick={() => profileInput.current?.click()} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-500 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-400 disabled:opacity-50"><UploadCloud size={17}/> Upload new profile picture</button><input ref={profileInput} type="file" accept="image/*" className="hidden" onChange={(event) => changeProfileImage(event.target.files?.[0])}/></div>
+        <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-300">Hero image</p><h3 className="mt-2 text-2xl font-bold text-white">Owner profile picture</h3><p className="mt-2 max-w-xl text-sm leading-6 text-slate-400">Upload a new profile image. The dashboard requests a secure, time-limited upload URL from the owner API, then sends the image directly to Supabase Storage. This avoids routing image bytes through Render.</p><button type="button" disabled={busy} onClick={() => profileInput.current?.click()} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-500 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-400 disabled:opacity-50"><UploadCloud size={17}/> Upload new profile picture</button>{busy && uploadProgress > 0 && <div className="mt-4 h-2 w-full max-w-xl overflow-hidden rounded-full bg-slate-800"><div className="h-full rounded-full bg-blue-400 transition-all" style={{ width: uploadProgress + '%' }} /></div>}<input ref={profileInput} type="file" accept="image/*" className="hidden" onChange={(event) => changeProfileImage(event.target.files?.[0])}/></div>
       </div>
     </section>
   )
@@ -171,7 +175,7 @@ export function OwnerDashboard({ session, onSignOut }: OwnerDashboardProps) {
         <main className="min-w-0 flex-1">
           <header className="sticky top-0 z-20 border-b border-slate-800 bg-[#050914]/85 px-5 py-5 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl items-center justify-between gap-5"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">PRUDEN JACK GIDEON · CONTROL ROOM</p><h2 className="mt-1 flex items-center gap-2 text-xl font-bold sm:text-2xl">{ownerNavigation.find((item) => item.section === activeSection)?.label}</h2></div><div className="hidden items-center gap-3 sm:flex"><ShieldCheck size={17} className="text-emerald-300"/><span className="max-w-[220px] truncate text-xs text-slate-400">{session.ownerId}</span></div></div></header>
           <div className="mx-auto max-w-7xl px-5 py-7 sm:px-8 lg:px-10">
-            {notice && <div className="mb-7 flex items-start gap-3 rounded-xl border border-slate-800 bg-slate-950/30 px-4 py-3"><CircleAlert className="mt-0.5 shrink-0 text-blue-300" size={17}/><p className="text-xs leading-5 text-slate-500">Owner-only controls are protected by a server session. Uploaded media is committed to the portfolio repository and becomes public after the Render rebuild.</p><button type="button" onClick={() => setNotice(false)} className="ml-auto text-slate-600"><X size={15}/></button></div>}
+            {notice && <div className="mb-7 flex items-start gap-3 rounded-xl border border-slate-800 bg-slate-950/30 px-4 py-3"><CircleAlert className="mt-0.5 shrink-0 text-blue-300" size={17}/><p className="text-xs leading-5 text-slate-500">Owner-only controls are protected by a server session. Images upload directly to Supabase Storage; only the resulting public URL is saved in the portfolio record.</p><button type="button" onClick={() => setNotice(false)} className="ml-auto text-slate-600"><X size={15}/></button></div>}
             {content}
           </div>
         </main>
