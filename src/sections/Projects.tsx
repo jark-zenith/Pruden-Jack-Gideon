@@ -1,4 +1,4 @@
-import { Github } from 'lucide-react'
+import { GitBranch } from 'lucide-react'
 import { PageContainer } from '../components/layout/PageContainer'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import { ProjectCard } from '../components/ui/ProjectCard'
@@ -30,7 +30,7 @@ export function Projects() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-sm font-semibold text-blue-300 hover:text-blue-200"
           >
-            <Github size={16} /> Browse all repositories
+            <GitBranch size={16} /> Browse all repositories
           </a>
         </div>
       </PageContainer>
