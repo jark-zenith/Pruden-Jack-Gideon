@@ -19,6 +19,6 @@ export const projects: Project[] = [
     category: 'Technology / Business',
     featured: true,
     status: 'In development',
-    githubUrl: 'https://github.com/jark-zenith/PRUDEN-AI-TECH-INDUSTRIES-',
+    githubUrl: 'https://pruden-ai-tech-industries.onrender.com/',
   },
 ]
