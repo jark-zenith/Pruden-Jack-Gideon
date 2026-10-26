@@ -8,6 +8,7 @@ interface ButtonProps {
   type?: 'button' | 'submit' | 'reset'
   onClick?: () => void
   ariaLabel?: string
+  download?: boolean | string
 }
 
 export function Button({
@@ -18,6 +19,7 @@ export function Button({
   type = 'button',
   onClick,
   ariaLabel,
+  download,
 }: ButtonProps) {
   const baseStyles =
     'inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold tracking-[0.02em] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050914]'
@@ -35,9 +37,10 @@ export function Button({
     return (
       <a
         href={href}
+        download={download}
         className={`${baseStyles} ${variantStyles[variant]} ${className}`}
-        target={href.startsWith('http') ? '_blank' : undefined}
-        rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+        target={href.startsWith('http') && !download ? '_blank' : undefined}
+        rel={href.startsWith('http') && !download ? 'noopener noreferrer' : undefined}
         aria-label={ariaLabel}
       >
         {children}
