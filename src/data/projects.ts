@@ -10,6 +10,7 @@ export const projects: Project[] = [
     featured: true,
     status: 'Starter release',
     githubUrl: 'https://github.com/jark-zenith/PichaHub',
+    liveUrl: 'https://pichahub-web.onrender.com',
   },
   {
     id: 'deon-dev',
@@ -19,7 +20,8 @@ export const projects: Project[] = [
     category: 'Developer Tools',
     featured: true,
     status: 'In development',
-    githubUrl: 'https://deon-dev.onrender.com',
+    githubUrl: 'https://github.com/jark-zenith/Deon.dev-v2-',
+    liveUrl: 'https://deon-dev.onrender.com',
   },
   {
     id: 'ichat',
