@@ -6,7 +6,7 @@ import { Contact } from './sections/Contact'
 import { Cv } from './sections/Cv'
 import { Experience } from './sections/Experience'
 import { Hero } from './sections/Hero'
-import { Projects } from './sections/Projects'
+import { Ventures } from './sections/Ventures'
 import { Services } from './sections/Services'
 import { Skills } from './sections/Skills'
 import { OwnerDashboard } from './owner/OwnerDashboard'
@@ -77,8 +77,8 @@ function App() {
         <Hero />
         <About />
         <Skills />
-        <Projects />
         <Services />
+        <Ventures />
         <Experience />
         <Cv />
         <Contact />
