@@ -67,7 +67,8 @@ const BlurText: React.FC<BlurTextProps> = ({
 const menuItems = [
   { label: 'HOME', href: '#home' },
   { label: 'ABOUT', href: '#about' },
-  { label: 'PROJECTS', href: '#projects' },
+  { label: 'SERVICES', href: '#services' },
+  { label: 'VENTURES', href: '#ventures' },
   { label: 'EXPERIENCE', href: '#experience' },
   { label: 'EDUCATION', href: '#education' },
   { label: 'CONTACT', href: '#contact' },

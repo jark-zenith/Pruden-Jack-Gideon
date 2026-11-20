@@ -1,8 +1,9 @@
 import type { Service } from '../types'
 
 export const services: Service[] = [
-  { icon: 'code', title: 'Web Development', description: 'Responsive websites and product interfaces built with modern frontend tooling.', technologies: ['React', 'TypeScript', 'Vite'] },
-  { icon: 'sparkles', title: 'AI Integration', description: 'Practical AI features that connect models, APIs, and user workflows.', technologies: ['AI APIs', 'Python', 'Automation'] },
-  { icon: 'workflow', title: 'Product Prototyping', description: 'Fast experimentation from an idea or specification to a working digital prototype.', technologies: ['UX', 'React', 'Prototyping'] },
-  { icon: 'palette', title: 'UI Implementation', description: 'Premium, responsive interfaces with attention to motion, accessibility, and detail.', technologies: ['Tailwind', 'Framer Motion', 'Design systems'] },
+  { icon: 'code', title: 'Website Development', description: 'Responsive websites for individuals, small businesses, and organizations, including landing pages, business websites, and personal portfolios.', technologies: ['Responsive design', 'React', 'TypeScript'] },
+  { icon: 'workflow', title: 'Web Application Development', description: 'Interactive web applications, dashboards, booking and registration flows, and practical digital tools built around real user needs.', technologies: ['React', 'APIs', 'Supabase'] },
+  { icon: 'sparkles', title: 'AI Integration & Automation', description: 'Integrating AI capabilities and APIs into digital products, and connecting repetitive tasks into simpler workflows.', technologies: ['AI APIs', 'API integration', 'Workflow automation'] },
+  { icon: 'palette', title: 'Digital & Print Design', description: 'Clean digital graphics and practical print-ready materials, including personal and business cards, flyers, and simple brand collateral.', technologies: ['Canva', 'Layout design', 'Print-ready PDF'] },
+  { icon: 'zap', title: 'UI Implementation & Prototyping', description: 'Turning concepts, wireframes, and visual references into responsive interfaces and functional prototypes.', technologies: ['UI implementation', 'Tailwind CSS', 'Prototyping'] },
 ]

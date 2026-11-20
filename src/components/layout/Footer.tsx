@@ -4,7 +4,8 @@ import { SocialLinks } from '../ui/SocialLinks'
 const footerNavItems = [
   { label: 'Home', href: '#home' },
   { label: 'About', href: '#about' },
-  { label: 'Projects', href: '#projects' },
+  { label: 'Services', href: '#services' },
+  { label: 'Ventures', href: '#ventures' },
   { label: 'Contact', href: '#contact' },
 ]
 
@@ -21,7 +22,7 @@ export function Footer() {
               {personalInfo.name}
             </h3>
             <p className="text-sm text-slate-400">
-              Software developer & AI builder crafting digital experiences.
+              Technology & innovation enthusiast focused on web development, web applications, and AI.
             </p>
           </div>
 

@@ -24,18 +24,18 @@ const tabs = [
 const steps = [
   {
     id: 'identity',
-    title: 'ICT student becoming a software developer',
-    text: 'I am building a practical foundation across programming, operating systems, computer applications and modern software engineering while turning what I learn into working projects.',
+    title: 'Technology learner and web developer',
+    text: 'I am still increasing my knowledge across ICT, web development, web application development, and artificial intelligence through structured learning and practical work.',
   },
   {
     id: 'build',
     title: 'Ideas become working systems',
-    text: 'I enjoy taking an ambitious idea, breaking it into smaller components, then designing and building interfaces, APIs, automation and digital products that people can actually use.',
+    text: 'I enjoy understanding a need, breaking it into manageable parts, and shaping useful websites, web applications, interfaces, and AI-enabled workflows.',
   },
   {
     id: 'future',
     title: 'Building from Kenya for a wider audience',
-    text: 'My long-term direction sits at the intersection of software, artificial intelligence, intelligent interfaces and technology entrepreneurship through the PRUDEN ecosystem.',
+    text: 'My direction sits at the intersection of web technology, artificial intelligence, research, and entrepreneurship through Pruden Technologies and TeraVex.',
   },
 ]
 
@@ -46,7 +46,7 @@ export function About() {
       <FeatureShowcase
         eyebrow="About the builder"
         title="I build, test, learn, and build again."
-        description="I am PRUDEN JACK GIDEON — Jark. An ICT student, software developer in progress and AI builder from Kenya, focused on turning ambitious ideas into useful technology."
+        description="I am PRUDEN JACK GIDEON — Jark. A Kenya-based technology learner focused on web development, web applications, and artificial intelligence, with an interest in building practical digital solutions."
         stats={['Kenya-based', 'Software + AI', 'Product focused']}
         steps={steps}
         tabs={tabs}
